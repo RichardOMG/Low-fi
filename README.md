@@ -1,2 +1,2 @@
-Low-fi
-======
+Low-fi: Low frequency induction program
+=======================================
