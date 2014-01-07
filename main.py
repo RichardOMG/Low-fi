@@ -11,8 +11,10 @@ Last edited: November 2013
 """
 
 import os, sys
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 from rightofway import *
-from PyQt4 import QtGui, QtCore
+from towergeo import *
 
 class Window(QtGui.QWidget):
     
@@ -68,9 +70,10 @@ class Window(QtGui.QWidget):
         tab_widget.addTab(tab5, "Results") 
         
         page1 = rightofway_ui(tab1)
-        page2 = QtGui.QVBoxLayout(tab2)
+        page2 = towergeo_ui(tab2)
         
         page1.setup()
+        page2.setup()
         
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(menu_bar)
