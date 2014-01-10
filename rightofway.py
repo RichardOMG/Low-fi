@@ -14,7 +14,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import numpy
-import os, sys
+import globals
                       
 class rightofway_ui(QtGui.QVBoxLayout): 
     
@@ -28,7 +28,7 @@ class rightofway_ui(QtGui.QVBoxLayout):
         
         self.le = QtGui.QLineEdit()
         self.le.setFixedWidth(50)
-        self.le.setText('20')
+        self.le.setText(str(globals.no_sections))
         
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(label1)
@@ -36,15 +36,39 @@ class rightofway_ui(QtGui.QVBoxLayout):
         hbox.addWidget(update_button)
         hbox.setAlignment(Qt.AlignLeft)
         
-        self.tableWidget = QTableWidget(20,4)
-        self.tableWidget.setHorizontalHeaderLabels(['Start (m)', 'End (m)', 'Separation (m)', 'Earth (Ohms)'])
+        self.tableWidget = QTableWidget(globals.no_sections,3)
+        self.tableWidget.setHorizontalHeaderLabels(['Section Length (m)', 'Separation (m)', 'Earth (Ohms)'])
         
+        # Populate tableWidget based on (global) section data
+        for row in range(0,self.tableWidget.rowCount()):
+            item1 = QTableWidgetItem()
+            item2 = QTableWidgetItem()
+            item3 = QTableWidgetItem()
+            item1.setText(str(globals.sections[row,0]))
+            self.tableWidget.setItem(row, 0, item1)
+            item2.setText(str(globals.sections[row,1]))
+            self.tableWidget.setItem(row, 1, item2)
+            item3.setText(str(globals.sections[row,2]))
+            self.tableWidget.setItem(row, 2, item3)
+                    
         self.addLayout(hbox) 
         self.addWidget(self.tableWidget)
-        update_button.clicked.connect(self.buttonClicked)
         
+        update_button.clicked.connect(self.buttonClicked)
+        self.tableWidget.itemChanged.connect(self.update_data)
+    
+    # Update number of sections in right of way
     def buttonClicked(self, tableWidget):
       
-        noRows = int(self.le.text())
-        self.tableWidget.setRowCount(noRows)
+        globals.no_sections = int(self.le.text())
+        self.tableWidget.setRowCount(globals.no_sections)
+        globals.sections.resize((globals.no_sections,3))
+    
+    # Update sections matrix whenever table data is changed
+    def update_data(self, tableWidgetItem):
+        
+        globals.sections[tableWidgetItem.row(), tableWidgetItem.column()] = float(tableWidgetItem.text())
+        
+        # Diagnostics
+        print globals.sections
         

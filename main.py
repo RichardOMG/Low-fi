@@ -15,12 +15,17 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from rightofway import *
 from towergeo import *
+from pipeline import *
+from network import *
+from results import *
+import globals
 
 class Window(QtGui.QWidget):
     
     def __init__(self):
         super(Window, self).__init__()
         
+        globals.init()
         self.initUI()
         
     def initUI(self):
@@ -64,16 +69,22 @@ class Window(QtGui.QWidget):
         tab5 = QtGui.QWidget()
                
         tab_widget.addTab(tab1, "Right of Way")
-        tab_widget.addTab(tab2, "Tower Geometry") 
+        tab_widget.addTab(tab2, "Tower") 
         tab_widget.addTab(tab3, "Pipeline") 
-        tab_widget.addTab(tab4, "Load / Fault") 
+        tab_widget.addTab(tab4, "Network") 
         tab_widget.addTab(tab5, "Results") 
         
         page1 = rightofway_ui(tab1)
         page2 = towergeo_ui(tab2)
+        page3 = pipeline_ui(tab3)
+        page4 = network_ui(tab4)
+        page5 = results_ui(tab5)
         
         page1.setup()
         page2.setup()
+        page3.setup()
+        page4.setup()
+        page5.setup()
         
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(menu_bar)

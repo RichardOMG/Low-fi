@@ -4,7 +4,7 @@
 """
 Low-fi: Low frequency induction simulation
 
-Tower Geometry Tab
+Tower Tab
 
 Author: Julius Susanto
 Last edited: January 2014
@@ -13,8 +13,7 @@ Last edited: January 2014
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-import numpy
-import os, sys
+import globals
                       
 class towergeo_ui(QtGui.QVBoxLayout): 
     
@@ -28,7 +27,7 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le1 = QtGui.QLineEdit()
         self.le1.setFixedWidth(50)
-        self.le1.setText('4')
+        self.le1.setText(str(globals.tower_data["L_ab"]))
         
         label1a = QtGui.QLabel('m')
         label1a.setFixedWidth(10)
@@ -38,7 +37,7 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le2 = QtGui.QLineEdit()
         self.le2.setFixedWidth(50)
-        self.le2.setText('1')
+        self.le2.setText(str(globals.tower_data["L_ac"]))
         
         label2a = QtGui.QLabel('m')
         label2a.setFixedWidth(10)
@@ -48,7 +47,7 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le3 = QtGui.QLineEdit()
         self.le3.setFixedWidth(50)
-        self.le3.setText('2')
+        self.le3.setText(str(globals.tower_data["L_aw"]))
         
         label3a = QtGui.QLabel('m')
         label3a.setFixedWidth(10)
@@ -58,7 +57,7 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le4 = QtGui.QLineEdit()
         self.le4.setFixedWidth(50)
-        self.le4.setText('15')
+        self.le4.setText(str(globals.tower_data["H_a"]))
         
         label4a = QtGui.QLabel('m')
         label4a.setFixedWidth(10)
@@ -68,7 +67,7 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le5 = QtGui.QLineEdit()
         self.le5.setFixedWidth(50)
-        self.le5.setText('18')
+        self.le5.setText(str(globals.tower_data["H_b"]))
         
         label5a = QtGui.QLabel('m')
         label5a.setFixedWidth(10)
@@ -78,7 +77,7 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le6 = QtGui.QLineEdit()
         self.le6.setFixedWidth(50)
-        self.le6.setText('21')
+        self.le6.setText(str(globals.tower_data["H_c"]))
         
         label6a = QtGui.QLabel('m')
         label6a.setFixedWidth(10)
@@ -88,10 +87,27 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le7 = QtGui.QLineEdit()
         self.le7.setFixedWidth(50)
-        self.le7.setText('25')
+        self.le7.setText(str(globals.tower_data["H_w"]))
         
         label7a = QtGui.QLabel('m')
         label7a.setFixedWidth(10)
+        
+        label8 = QtGui.QLabel('Z_w')
+        label8.setFixedWidth(50)
+        
+        self.le8a = QtGui.QLineEdit()
+        self.le8a.setFixedWidth(50)
+        self.le8a.setText(str(globals.tower_data["Z_w"].real))
+        
+        label8a = QtGui.QLabel('+ j')
+        label8a.setFixedWidth(15)
+        
+        self.le8b = QtGui.QLineEdit()
+        self.le8b.setFixedWidth(50)
+        self.le8b.setText(str(globals.tower_data["Z_w"].imag))
+        
+        label8b = QtGui.QLabel('Ohm')
+        label8b.setFixedWidth(25)
         
         grid = QtGui.QGridLayout()
         inner_grid = QtGui.QGridLayout()
@@ -118,6 +134,34 @@ class towergeo_ui(QtGui.QVBoxLayout):
         inner_grid.addWidget(label7, 6, 0)
         inner_grid.addWidget(self.le7, 6, 1)
         inner_grid.addWidget(label7a, 6, 2)
+        
+        inner_grid.addWidget(label8, 7, 0)
+        inner_grid.addWidget(self.le8a, 7, 1)
+        inner_grid.addWidget(label8a, 7, 2)
+        inner_grid.addWidget(self.le8b, 7, 3)
+        inner_grid.addWidget(label8b, 7, 4)
+        
         grid.addLayout(inner_grid, 0, 1)
         
         self.addLayout(grid)
+        
+        self.le1.editingFinished.connect(self.update_data)
+        self.le2.editingFinished.connect(self.update_data)
+        self.le3.editingFinished.connect(self.update_data)
+        self.le4.editingFinished.connect(self.update_data)
+        self.le5.editingFinished.connect(self.update_data)
+        self.le6.editingFinished.connect(self.update_data)
+        self.le7.editingFinished.connect(self.update_data)
+        self.le8a.editingFinished.connect(self.update_data)
+        self.le8b.editingFinished.connect(self.update_data)
+
+    # Update global tower object on change event
+    def update_data(self):
+        globals.tower_data["L_ab"] = float(self.le1.text())
+        globals.tower_data["L_ac"] = float(self.le2.text())
+        globals.tower_data["L_aw"] = float(self.le3.text())
+        globals.tower_data["H_a"] = float(self.le4.text())
+        globals.tower_data["H_b"] = float(self.le5.text())
+        globals.tower_data["H_c"] = float(self.le6.text())
+        globals.tower_data["H_w"] = float(self.le7.text())
+        globals.tower_data["Z_w"] = complex(float(self.le8a.text()), float(self.le8b.text()))
