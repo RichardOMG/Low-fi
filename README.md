@@ -5,3 +5,6 @@ Minimum requirements
 - Python 2.7
 - PyQt
 - Numpy
+- Matplotlib
+	- Dateutil
+	- Pyparsing

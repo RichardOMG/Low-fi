@@ -70,5 +70,5 @@ class rightofway_ui(QtGui.QVBoxLayout):
         globals.sections[tableWidgetItem.row(), tableWidgetItem.column()] = float(tableWidgetItem.text())
         
         # Diagnostics
-        print globals.sections
+        # print globals.sections
         

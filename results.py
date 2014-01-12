@@ -13,9 +13,12 @@ Last edited: January 2014
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+import os, sys, math
 import globals
-import numpy
-import os, sys
+import numpy as np
+import dateutil, pyparsing
+import matplotlib.pyplot as plt
+
                       
 class results_ui(QtGui.QVBoxLayout): 
     
@@ -25,7 +28,7 @@ class results_ui(QtGui.QVBoxLayout):
         label1.setFixedWidth(80)
         
         combo = QtGui.QComboBox()
-        combo.addItem("Load LFI")
+        #combo.addItem("Load LFI")
         combo.addItem("Fault LFI")
         
         calc_button = QtGui.QPushButton("Calculate")
@@ -43,12 +46,117 @@ class results_ui(QtGui.QVBoxLayout):
         
         self.addLayout(vbox)
         calc_button.clicked.connect(self.calculate)
-        
+    
+    # Calculate load and fault LFI voltages on the pipeline
     def calculate(self, tableWidget):
-      
-        print globals.pipe_data["pipe_rho"]
-        print globals.network_data["freq"]
-        print globals.network_data["angle_c"]
-        print globals.tower_data["Z_w"]
         
-        print globals.sections
+        # Pipeline longitudinal series impedance (in Ohm/km)
+        mu_0 = 4 * np.pi * 1e-7
+        Zi_re = 1/(np.pi * globals.pipe_data["diameter"]) * ((50 * np.pi * globals.pipe_data["pipe_rho"] * mu_0 * globals.pipe_data["pipe_mu"]) ** 0.5) + 100 * np.pi * mu_0 / 8
+        Zi_im = mu_0 * globals.network_data["freq"] * math.log((3.7/globals.pipe_data["diameter"]) * (globals.pipe_data["soil_rho"]/ (mu_0 * 2 * np.pi *globals.network_data["freq"])) ** 0.5)
+        Z_i = complex(Zi_re * 1000, Zi_im * 1000)
+        
+        # Pipeline longitudinal shunt admittance (in Ohm^-1/km)
+        Yi_re = np.pi * globals.pipe_data["diameter"] / globals.pipe_data["coat_rho"] / globals.pipe_data["coat_thickness"]
+        Yi_im = 100 * np.pi * 8.85e-12 * globals.pipe_data["coat_mu"] * np.pi * globals.pipe_data["diameter"] / globals.pipe_data["coat_thickness"]
+        Y_i = complex(Yi_re * 1000, Yi_im * 1000)
+        
+        D_e = 658.37 * (globals.pipe_data["soil_rho"] / globals.network_data["freq"]) ** 0.5
+        
+        # Set up empty matrices Y_p (pipeline admittance), Y_e (earth admittance), V_p (LFI voltage)
+        Y_p = np.zeros([globals.no_sections,2], dtype=complex)
+        Y_e = np.zeros([globals.no_sections,1], dtype=complex)
+        V_p = np.zeros([globals.no_sections,1], dtype=complex)
+        
+        for row in range(0, globals.no_sections):
+            # Compute pipeline admittances
+            Y_p[row,0] = 1 / (Z_i * globals.sections[row,0] / 1000)
+            Y_p[row,1] = Y_i * globals.sections[row,0] / 1000
+            
+            # Compute earth admittances
+            if globals.sections[row,2] > 0:
+                Y_e[row] = 1 / globals.sections[row,2]
+            else:
+                Y_e[row] = 0
+            
+            # Calculate effective distances
+            if row < (globals.no_sections - 1):
+                L_a = (globals.sections[row,1] * globals.sections[row + 1,1]) ** 0.5
+                L_b = ((globals.sections[row,1] + globals.tower_data["L_ab"]) * (globals.sections[row + 1,1] + globals.tower_data["L_ab"])) ** 0.5
+                L_c = ((globals.sections[row,1] + globals.tower_data["L_ac"]) * (globals.sections[row + 1,1] + globals.tower_data["L_ac"])) ** 0.5
+                L_w = ((globals.sections[row,1] + globals.tower_data["L_aw"]) * (globals.sections[row + 1,1] + globals.tower_data["L_aw"])) ** 0.5
+            else:
+                L_a = globals.sections[row,1]
+                L_b = globals.sections[row,1] + globals.tower_data["L_ab"]
+                L_c = globals.sections[row,1] + globals.tower_data["L_ac"]
+                L_w = globals.sections[row,1] + globals.tower_data["L_aw"]
+                
+            D_ap = (L_a ** 2 + globals.tower_data["H_a"] ** 2) ** 0.5
+            D_bp = (L_b ** 2 + globals.tower_data["H_b"] ** 2) ** 0.5
+            D_cp = (L_c ** 2 + globals.tower_data["H_c"] ** 2) ** 0.5
+            # D_wp = (L_w ** 2 + globals.tower_data["H_w"] ** 2) ** 0.5
+            D_lp = (D_ap * D_bp * D_cp) ** (0.3333333333)
+            
+            # Mutual impedance between pipeline and line
+            Z_lp = complex(0.04935, 0.14468 * math.log10(D_e / D_lp))
+            
+            ###########################
+            # TO DO - Load LFI voltage
+            ###########################
+            
+            # Fault LFI (in kV)
+            V_p[row,0] = Z_lp * globals.network_data["fault_current"] * globals.network_data["split_factor"] * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000
+        
+        
+        # LFI voltage vector
+        Vbus = np.zeros([1 + 2 * globals.no_sections,1], dtype=complex)
+        Vbus = np.concatenate((Vbus, V_p))
+        
+        # Construct Ybus matrix
+        n = globals.no_sections
+        order = 1 + 3 * n
+        Ybus = np.zeros([order,order], dtype=complex)
+        
+        for row in range(0, n):
+            # Include earth admittance
+            if row == 0:
+                Ybus[0, 0] = Y_e[0,0]
+                Ybus[2, 2] = Y_p[row,0] + Y_p[row,1]
+            else:
+                Ybus[2*(row+1), 2*(row+1)] = Y_p[row,0] + Y_p[row,1]+ Y_e[row,0]
+            
+            Ybus[2*n + row + 1, 2*row] = 1
+            Ybus[2*n + row + 1, 2*row + 1] = -1
+            
+            Ybus[2*row, 2*n + row + 1] = 1
+            Ybus[2*row + 1, 2*n + row + 1] = -1
+            
+            Ybus[2*(row+1) - 1, 2*(row+1) - 1] = Y_p[row,0]
+            Ybus[2*(row+1), 2*(row+1) - 1] = -Y_p[row,0]
+            Ybus[2*(row+1) - 1, 2*(row+1)] = -Y_p[row,0]
+        
+        # Solve linear system
+        Ymat = np.matrix(Ybus)
+        Yinv = Ymat.getI()
+        Vpipe = Yinv * Vbus
+        
+        Vp_final = np.absolute(Vpipe[0:2*n+1:2])
+        
+        # Plot results
+        pipe_distance = np.concatenate(([0], np.cumsum(globals.sections[:,0])))
+                
+        plt.plot(pipe_distance, Vp_final)
+        plt.xlim([0, pipe_distance[n]])
+        plt.xlabel("Distance along pipeline (m)")
+        plt.ylabel("Pipeline-to-earth touch voltage (kV)")
+        plt.title("Fault LFI Voltages")
+        plt.grid(color = '0.75', linestyle='--', linewidth=1)
+        plt.show()
+        
+        ##############
+        # Diagnostics
+        ##############
+        
+        #print pipe_distance
+        #print Vp_final
+        
