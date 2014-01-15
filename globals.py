@@ -33,35 +33,35 @@ def init():
     
     
     tower_data = {
-        "L_ab"              : 4,
-        "L_ac"              : 1,
-        "L_aw"              : 2,
-        "H_a"               : 15,
-        "H_b"               : 18,
-        "H_c"               : 21,
-        "H_w"               : 25,
+        "L_ab"              : 4.0,
+        "L_ac"              : 1.0,
+        "L_aw"              : 2.0,
+        "H_a"               : 15.0,
+        "H_b"               : 18.0,
+        "H_c"               : 21.0,
+        "H_w"               : 25.0,
         "Z_w"                : 0.2741 + 0.2406j
         }
     
     pipe_data = {
         "diameter"          : 0.5,
         "pipe_rho"          : 0.00000018,
-        "pipe_mu"           : 300,
-        "soil_rho"          : 100,
+        "pipe_mu"           : 300.0,
+        "soil_rho"          : 100.0,
         "coat_thickness"    : 0.0013,
-        "coat_rho"          : 50000000,
-        "coat_mu"           : 5
+        "coat_rho"          : 50000000.0,
+        "coat_mu"           : 5.0
         }
         
     network_data = {
-        "freq"              : 50,
-        "current_a"         : 100,     
-        "angle_a"           : 0,
-        "current_b"         : 100,     
-        "angle_b"           : 120,
-        "current_c"         : 100,     
-        "angle_c"           : -120,
-        "fault_current"     : 20,
+        "freq"              : 50.0,
+        "current_a"         : 100.0,     
+        "angle_a"           : 0.0,
+        "current_b"         : 100.0,     
+        "angle_b"           : 120.0,
+        "current_c"         : 100.0,     
+        "angle_c"           : -120.0,
+        "fault_current"     : 20.0,
         "split_factor"      : 0.7,
         "shield_factor"     : 0.8
         }

@@ -13,7 +13,7 @@ Last edited: January 2014
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-import os, sys, math
+import os, sys
 import globals
 import numpy as np
 import dateutil, pyparsing
@@ -27,16 +27,16 @@ class results_ui(QtGui.QVBoxLayout):
         label1 = QtGui.QLabel('Select study:')
         label1.setFixedWidth(80)
         
-        combo = QtGui.QComboBox()
-        #combo.addItem("Load LFI")
-        combo.addItem("Fault LFI")
+        self.combo = QtGui.QComboBox()
+        self.combo.addItem("Load LFI")
+        self.combo.addItem("Fault LFI")
         
         calc_button = QtGui.QPushButton("Calculate")
         calc_button.setFixedWidth(80)
         
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(label1)
-        hbox.addWidget(combo)
+        hbox.addWidget(self.combo)
         hbox.addWidget(calc_button)
         hbox.setAlignment(Qt.AlignLeft)
         
@@ -50,23 +50,30 @@ class results_ui(QtGui.QVBoxLayout):
     # Calculate load and fault LFI voltages on the pipeline
     def calculate(self, tableWidget):
         
-        # Pipeline longitudinal series impedance (in Ohm/km)
+        # Pipeline longitudinal series impedance (in Ohm/km) - from CIGRE WG 36.02 Appendix G
+        omega = 2 * np.pi * globals.network_data["freq"]
         mu_0 = 4 * np.pi * 1e-7
-        Zi_re = 1/(np.pi * globals.pipe_data["diameter"]) * ((50 * np.pi * globals.pipe_data["pipe_rho"] * mu_0 * globals.pipe_data["pipe_mu"]) ** 0.5) + 100 * np.pi * mu_0 / 8
-        Zi_im = mu_0 * globals.network_data["freq"] * math.log((3.7/globals.pipe_data["diameter"]) * (globals.pipe_data["soil_rho"]/ (mu_0 * 2 * np.pi *globals.network_data["freq"])) ** 0.5)
+        Zi_re = 1/(np.pi * globals.pipe_data["diameter"] * np.sqrt(2)) * ((omega * globals.pipe_data["pipe_rho"] * mu_0 * globals.pipe_data["pipe_mu"]) ** 0.5) + omega * mu_0 / 8
+        Zi_im = mu_0 * globals.network_data["freq"] * np.log((3.7/globals.pipe_data["diameter"]) * (globals.pipe_data["soil_rho"]/ (mu_0 * omega)) ** 0.5)
         Z_i = complex(Zi_re * 1000, Zi_im * 1000)
         
-        # Pipeline longitudinal shunt admittance (in Ohm^-1/km)
+        # Pipeline longitudinal shunt admittance (in Ohm^-1/km) - from CIGRE WG 36.02 Appendix G
         Yi_re = np.pi * globals.pipe_data["diameter"] / globals.pipe_data["coat_rho"] / globals.pipe_data["coat_thickness"]
-        Yi_im = 100 * np.pi * 8.85e-12 * globals.pipe_data["coat_mu"] * np.pi * globals.pipe_data["diameter"] / globals.pipe_data["coat_thickness"]
+        Yi_im = omega * 8.85e-12 * globals.pipe_data["coat_mu"] * np.pi * globals.pipe_data["diameter"] / globals.pipe_data["coat_thickness"]
         Y_i = complex(Yi_re * 1000, Yi_im * 1000)
         
+        # Return current depth
         D_e = 658.37 * (globals.pipe_data["soil_rho"] / globals.network_data["freq"]) ** 0.5
         
         # Set up empty matrices Y_p (pipeline admittance), Y_e (earth admittance), V_p (LFI voltage)
         Y_p = np.zeros([globals.no_sections,2], dtype=complex)
         Y_e = np.zeros([globals.no_sections,1], dtype=complex)
         V_p = np.zeros([globals.no_sections,1], dtype=complex)
+        
+        # Load currents
+        I_a = complex(globals.network_data["current_a"] * np.cos(globals.network_data["angle_a"] * np.pi / 180), globals.network_data["current_a"] * np.sin(globals.network_data["angle_a"] * np.pi / 180))
+        I_b = complex(globals.network_data["current_b"] * np.cos(globals.network_data["angle_b"] * np.pi / 180), globals.network_data["current_b"] * np.sin(globals.network_data["angle_b"] * np.pi / 180))
+        I_c = complex(globals.network_data["current_c"] * np.cos(globals.network_data["angle_c"] * np.pi / 180), globals.network_data["current_c"] * np.sin(globals.network_data["angle_c"] * np.pi / 180))
         
         for row in range(0, globals.no_sections):
             # Compute pipeline admittances
@@ -79,7 +86,7 @@ class results_ui(QtGui.QVBoxLayout):
             else:
                 Y_e[row] = 0
             
-            # Calculate effective distances
+            # Calculate effective (geometric mean) distances
             if row < (globals.no_sections - 1):
                 L_a = (globals.sections[row,1] * globals.sections[row + 1,1]) ** 0.5
                 L_b = ((globals.sections[row,1] + globals.tower_data["L_ab"]) * (globals.sections[row + 1,1] + globals.tower_data["L_ab"])) ** 0.5
@@ -94,19 +101,29 @@ class results_ui(QtGui.QVBoxLayout):
             D_ap = (L_a ** 2 + globals.tower_data["H_a"] ** 2) ** 0.5
             D_bp = (L_b ** 2 + globals.tower_data["H_b"] ** 2) ** 0.5
             D_cp = (L_c ** 2 + globals.tower_data["H_c"] ** 2) ** 0.5
+            
+            #########################################################
+            # TO DO - Earth wire shielding factor calculation
+            #         At the moment, a user-defined shielding 
+            #         factor is used (a bit dodgy as can be "tuned")
+            #########################################################
             # D_wp = (L_w ** 2 + globals.tower_data["H_w"] ** 2) ** 0.5
+            
+            # Equivalent distance for all three lines
             D_lp = (D_ap * D_bp * D_cp) ** (0.3333333333)
             
-            # Mutual impedance between pipeline and line
-            Z_lp = complex(0.04935, 0.14468 * math.log10(D_e / D_lp))
+            # Mutual impedances between pipeline and line conductors
+            Z_lp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_lp))
+            Z_ap = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_ap))
+            Z_bp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_bp))
+            Z_cp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_cp))
             
-            ###########################
-            # TO DO - Load LFI voltage
-            ###########################
-            
-            # Fault LFI (in kV)
-            V_p[row,0] = Z_lp * globals.network_data["fault_current"] * globals.network_data["split_factor"] * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000
-        
+            if self.combo.currentText() == "Load LFI":
+                # Load LFI (in V)
+                V_p[row,0] = (Z_ap * I_a + Z_bp * I_b + Z_cp * I_c) * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000
+            else:
+                # Fault LFI (in kV)
+                V_p[row,0] = Z_lp * globals.network_data["fault_current"] * globals.network_data["split_factor"] * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000        
         
         # LFI voltage vector
         Vbus = np.zeros([1 + 2 * globals.no_sections,1], dtype=complex)
@@ -140,16 +157,22 @@ class results_ui(QtGui.QVBoxLayout):
         Yinv = Ymat.getI()
         Vpipe = Yinv * Vbus
         
+        # Get the final pipeline-to-earth touch voltage (absolute value, every second node)
         Vp_final = np.absolute(Vpipe[0:2*n+1:2])
         
         # Plot results
         pipe_distance = np.concatenate(([0], np.cumsum(globals.sections[:,0])))
-                
         plt.plot(pipe_distance, Vp_final)
         plt.xlim([0, pipe_distance[n]])
         plt.xlabel("Distance along pipeline (m)")
-        plt.ylabel("Pipeline-to-earth touch voltage (kV)")
-        plt.title("Fault LFI Voltages")
+        
+        if self.combo.currentText() == "Load LFI":
+            plt.ylabel("Pipeline-to-earth touch voltage (V)")
+            plt.title("Load LFI Voltages")
+        else:
+            plt.ylabel("Pipeline-to-earth touch voltage (kV)")
+            plt.title("Fault LFI Voltages")
+        
         plt.grid(color = '0.75', linestyle='--', linewidth=1)
         plt.show()
         
