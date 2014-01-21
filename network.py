@@ -171,3 +171,16 @@ class network_ui(QtGui.QVBoxLayout):
         globals.network_data["fault_current"] = float(self.le7.text())
         globals.network_data["split_factor"] = float(self.le8.text())
         globals.network_data["shield_factor"] = float(self.le9.text())
+
+    def refresh_data(self):
+        """Update text fields to match global variables."""
+        self.le1.setText(str(globals.network_data["freq"]))
+        self.le3a.setText(str(globals.network_data["current_a"]))
+        self.le3b.setText(str(globals.network_data["angle_a"]))
+        self.le4a.setText(str(globals.network_data["current_b"]))
+        self.le4b.setText(str(globals.network_data["angle_b"]))
+        self.le5a.setText(str(globals.network_data["current_c"]))
+        self.le5b.setText(str(globals.network_data["angle_c" ]))
+        self.le7.setText(str(globals.network_data["fault_current"]))
+        self.le8.setText(str(globals.network_data["split_factor"]))
+        self.le9.setText(str(globals.network_data["shield_factor"]))

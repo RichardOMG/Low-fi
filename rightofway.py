@@ -72,3 +72,18 @@ class rightofway_ui(QtGui.QVBoxLayout):
         # Diagnostics
         # print globals.sections
         
+    def refresh_data(self):
+        """Update text fields to match global variables."""
+        print(globals.no_sections)
+        print(globals.sections)
+        self.tableWidget.setRowCount(globals.no_sections)
+        self.le.setText(str(globals.no_sections))
+        for row in range(0, self.tableWidget.rowCount()):
+            for col in range(0,3):
+                print(row,col,globals.sections[row,col])
+                item = QTableWidgetItem()
+                item.setText(str(globals.sections[row, col]))
+                self.tableWidget.setItem(row, col, item)
+
+            
+        

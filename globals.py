@@ -11,6 +11,8 @@ Last edited: January 2014
 """
 
 import numpy as np
+import simplejson as json
+import sys
 
 def init():
     global no_sections
@@ -65,4 +67,97 @@ def init():
         "split_factor"      : 0.7,
         "shield_factor"     : 0.8
         }
+
+    global filename   
+    filename = ""    
+
+
+
+def write_project_to_file(fname, data = False, readable = True):
+    """Write project settings and data to file.  Uses simplejson library.
     
+    File is stored in human readable(ish) format.  We can make this compact by removing whitespace from
+    indent and separators.  This is an option in case we start getting huge file sizes.
+    
+    :param fname: String of file (name and path) to write to.
+    :type fname: String
+    :param data: Optional argument.  Dictionary of data to write to file.  If not supplied the function will read from globals.
+    :param type: Dictionary
+    :param readable: Optional argument.  True if output should be formatted to be more easily readable.
+    :type readable: Boolean
+    :returns: True if the write was successful."""    
+    global filename    
+    if not data:    
+        data = dict()    
+        data['no_sections'] = no_sections
+        data['sections'] = sections
+        data['tower_data'] = tower_data
+        data['pipe_data'] = pipe_data
+        data['network_data'] = network_data         
+    try:
+        fp = open(fname, mode = 'w')
+        if readable:
+            json.dump(data, fp, cls=NumpyJSONEncoder, indent = "  ", separators=(',', ': '), sort_keys = True)
+        else:
+            json.dump(data, fp, cls=NumpyJSONEncoder, indent = 2, separators=(',',':'))
+        fp.close()
+        filename = fname
+    except:
+        return False
+    return True
+    
+
+
+def load_project_from_file(fname, populate = True):
+    """Load project settings and data from file.  Uses simplejson library.
+    Global variables will be populated from data in file unless otherwise directed.
+    
+    :param fname: String of file (name and path) to read from.
+    :type fname: String
+    :param populate: Boolean indicating if read data should be populated into global variables.
+    :type populate: Boolean
+    :returns: Dictionary of data if read was successful, otherwise returns False.
+    """
+    global no_sections
+    global sections
+    global tower_data
+    global pipe_data
+    global network_data
+    global filename
+    try:
+        fp = open(fname, mode = 'r')
+        data = json.load(fp, object_hook = NumpyJSONDecoder)
+        fp.close    
+        filename = fname
+        if populate:
+            no_sections = data['no_sections']
+            sections = data['sections']
+            tower_data = data['tower_data']
+            pipe_data = data['pipe_data']
+            network_data = data['network_data']
+            if no_sections != len(sections):
+                no_sections = len(sections)
+    except:
+        print(sys.exc_info()[0], sys.exc_info()[1])
+        return False
+    return data
+    
+
+class NumpyJSONEncoder(json.JSONEncoder):
+    """JSON encoder to support encoding of Numpy arrays and complex numbers."""
+    def default(self, obj):
+        """Default is called by JSONEncoder for serialisation of data.
+           Passes back to core default method if not Numpy data."""
+        if isinstance(obj, np.complex):
+            return dict(__npcomplex__=True, real=obj.real, imag=obj.imag)            
+        if isinstance(obj, np.ndarray):
+            return dict(__nparray__=True, data=obj.tolist())
+        return json.JSONEncoder.default(self, obj)
+
+def NumpyJSONDecoder(dct):
+    """Decoder function to support Numpy data encoded by NumpyJSONEncoder."""
+    if '__npcomplex__' in dct:
+        return np.complex(dct['real'], dct['imag'])
+    if '__nparray__' in dct:
+        return np.array(dct['data'])
+    return dct

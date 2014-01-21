@@ -8,3 +8,4 @@ Minimum requirements
 - Matplotlib
 	- Dateutil
 	- Pyparsing
+- simplejson

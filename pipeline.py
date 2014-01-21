@@ -133,3 +133,12 @@ class pipeline_ui(QtGui.QVBoxLayout):
         globals.pipe_data["coat_rho"] = float(self.le6.text())
         globals.pipe_data["coat_mu"] = float(self.le7.text())
         
+    def refresh_data(self):
+        """Update text fields to match global variables."""
+        self.le1.setText(str(globals.pipe_data["diameter"]))
+        self.le2.setText(str(globals.pipe_data["pipe_rho"]))
+        self.le3.setText(str(globals.pipe_data["pipe_mu"]))
+        self.le4.setText(str(globals.pipe_data["soil_rho"]))
+        self.le5.setText(str(globals.pipe_data["coat_thickness"]))
+        self.le6.setText(str(globals.pipe_data["coat_rho"]))
+        self.le7.setText(str(globals.pipe_data["coat_mu"]))

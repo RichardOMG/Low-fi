@@ -43,11 +43,30 @@ class Window(QtGui.QWidget):
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(QtGui.qApp.quit)
 
+        ###########################
+        # TO DO - Add Save button which will be greyed out if no changes from saved data
+        #         Save button should bring up Save As if no open file
+        ###########################
+
+        saveAsAction = QtGui.QAction(QtGui.QIcon('icons\saveas.ico'), 'Save &As', self)
+        saveAsAction.setShortcut('Ctrl+A')
+        saveAsAction.setStatusTip('Save project as')
+        saveAsAction.triggered.connect(self.save_as_fn)
+
+
+        openAction = QtGui.QAction(QtGui.QIcon('icons\open.ico'), '&Open', self)
+        openAction.setShortcut('Ctrl+O')
+        openAction.setStatusTip('Open project')
+        openAction.triggered.connect(self.open_fn)
+
         """
         Menubar
         """
         menu_bar = QtGui.QMenuBar() 
         fileMenu = menu_bar.addMenu('&File')
+        fileMenu.addAction(saveAsAction)
+        fileMenu.addAction(openAction)
+        fileMenu.addSeparator()
         fileMenu.addAction(exitAction)
         
                
@@ -79,6 +98,7 @@ class Window(QtGui.QWidget):
         page3 = pipeline_ui(tab3)
         page4 = network_ui(tab4)
         page5 = results_ui(tab5)
+        self.pages = [page1, page2, page3, page4, page5]
         
         page1.setup()
         page2.setup()
@@ -100,7 +120,49 @@ class Window(QtGui.QWidget):
         cp = QtGui.QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
+        
+    def refresh_data(self):
+        """Refresh each page with data from globals variables."""
+        for p in self.pages:
+            p.refresh_data()
+            
 
+    def save_as_fn(self):
+        """Function for the Save As action."""
+        if globals.write_project_to_file(QtGui.QFileDialog.getSaveFileName(self, "Save Data File As", "", "LowFi project files (*.lfi)")):
+            return
+        print("Error writing to file or Save As cancelled.")
+            ###########################
+            # TO DO - Distinguish between cancel and failure
+            #       - Some sort of error notification
+            #       - Put open filename in title bar
+            ###########################
+            
+    def save_fn(self):    
+        """Function for the Save action."""
+        if globals.filename != "":
+            if globals.write_project_to_file(globals.filename):
+                return                    
+        ###########################
+        # TO DO - Some sort of error notification
+        ###########################
+            
+    def open_fn(self):
+        """Function for the Open action."""
+        ###########################
+        # TO DO - Confirmation for opening file if data is unsaved
+        #       - Put open filename in title bar
+        ###########################
+        if globals.load_project_from_file(QtGui.QFileDialog.getOpenFileName(self, "Open Data File", "", "LowFi project files (*.lfi)")):
+            self.refresh_data()
+        else:
+            print("Error opening file or file open cancelled.")
+            ###########################
+            # TO DO - Distinguish between cancel and failure
+            #       - Some sort of error notification
+            ###########################         
+    
+    
 def main():
     
     app = QtGui.QApplication(sys.argv)

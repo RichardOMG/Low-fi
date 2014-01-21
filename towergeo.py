@@ -165,3 +165,16 @@ class towergeo_ui(QtGui.QVBoxLayout):
         globals.tower_data["H_c"] = float(self.le6.text())
         globals.tower_data["H_w"] = float(self.le7.text())
         globals.tower_data["Z_w"] = complex(float(self.le8a.text()), float(self.le8b.text()))
+        
+    def refresh_data(self):
+        """Update text fields to match global variables."""   
+        self.le1.setText(str(globals.tower_data["L_ab"]))
+        self.le2.setText(str(globals.tower_data["L_ac"]))
+        self.le3.setText(str(globals.tower_data["L_aw"]))
+        self.le4.setText(str(globals.tower_data["H_a"]))
+        self.le5.setText(str(globals.tower_data["H_b"]))
+        self.le6.setText(str(globals.tower_data["H_c"]))
+        self.le7.setText(str(globals.tower_data["H_w"]))
+        self.le8a.setText(str(globals.tower_data["Z_w"].real))
+        self.le8b.setText(str(globals.tower_data["Z_w"].imag))
+         

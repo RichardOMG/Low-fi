@@ -183,3 +183,10 @@ class results_ui(QtGui.QVBoxLayout):
         #print pipe_distance
         #print Vp_final
         
+
+    def refresh_data(self):
+        """Update text fields to match global variables."""
+        ##############
+        # TO DO - Remove this if we don't need it
+        ##############
+        
