@@ -6,7 +6,7 @@ Low-fi: Low frequency induction simulation
 
 Network Tab
 
-Author: Julius Susanto
+Authors: Julius Susanto and Tom Walker
 Last edited: January 2014
 """
 
@@ -109,7 +109,7 @@ class network_ui(QtGui.QVBoxLayout):
         self.le8.setFixedWidth(50)
         self.le8.setText(str(globals.network_data["split_factor"]))
         
-        label9 = QtGui.QLabel('Earth wire shielding factor')
+        label9 = QtGui.QLabel('Shielding factor')
         label9.setFixedWidth(150)
         
         self.le9 = QtGui.QLineEdit()

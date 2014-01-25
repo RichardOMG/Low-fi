@@ -6,7 +6,7 @@ Low-fi: Low frequency induction simulation
 
 Global Objects and Variables
 
-Author: Julius Susanto
+Authors: Julius Susanto and Tom Walker
 Last edited: January 2014
 """
 

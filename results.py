@@ -6,7 +6,7 @@ Low-fi: Low frequency induction simulation
 
 Results Tab
 
-Author: Julius Susanto
+Authors: Julius Susanto and Tom Walker
 Last edited: January 2014
 """
 
@@ -107,10 +107,16 @@ class results_ui(QtGui.QVBoxLayout):
             #         At the moment, a user-defined shielding 
             #         factor is used (a bit dodgy as can be "tuned")
             #########################################################
-            # D_wp = (L_w ** 2 + globals.tower_data["H_w"] ** 2) ** 0.5
-            
+            D_aw = (globals.tower_data["L_aw"] ** 2 + (globals.tower_data["H_w"] - globals.tower_data["H_a"]) ** 2) ** 0.5
+            D_bw = ((globals.tower_data["L_aw"] - globals.tower_data["L_ab"]) ** 2 + (globals.tower_data["H_w"] - globals.tower_data["H_b"]) ** 2) ** 0.5
+            D_cw = ((globals.tower_data["L_aw"] - globals.tower_data["L_ac"]) ** 2 + (globals.tower_data["H_w"] - globals.tower_data["H_c"]) ** 2) ** 0.5
+            D_wp = (L_w ** 2 + globals.tower_data["H_w"] ** 2) ** 0.5
+                        
             # Equivalent distance for all three lines
             D_lp = (D_ap * D_bp * D_cp) ** (0.3333333333)
+            
+            # Self impedance of earth wire
+            Z_w = globals.tower_data["Z_w"]
             
             # Mutual impedances between pipeline and line conductors
             Z_lp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_lp))
@@ -118,9 +124,20 @@ class results_ui(QtGui.QVBoxLayout):
             Z_bp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_bp))
             Z_cp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_cp))
             
+            # Earth wire mutual impedances
+            Z_aw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_aw))
+            Z_bw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_bw))
+            Z_cw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_cw))
+            Z_wp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_wp))
+            
+            # Adjusted mutual impedance with influence of earth wire
+            Z_apw = Z_ap - Z_aw * Z_wp / Z_w
+            Z_bpw = Z_bp - Z_bw * Z_wp / Z_w
+            Z_cpw = Z_cp - Z_cw * Z_wp / Z_w
+            
             if self.combo.currentText() == "Load LFI":
                 # Load LFI (in V)
-                V_p[row,0] = (Z_ap * I_a + Z_bp * I_b + Z_cp * I_c) * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000
+                V_p[row,0] = (Z_apw * I_a + Z_bpw * I_b + Z_cpw * I_c) * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000
             else:
                 # Fault LFI (in kV)
                 V_p[row,0] = Z_lp * globals.network_data["fault_current"] * globals.network_data["split_factor"] * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000        

@@ -6,7 +6,7 @@ Low-fi: Low frequency induction simulation
 
 Main window
 
-Author: Julius Susanto
+Authors: Julius Susanto and Tom Walker
 Last edited: November 2013
 """
 
@@ -32,7 +32,7 @@ class Window(QtGui.QWidget):
         
         self.resize(700, 500)
         self.centre()
-        self.setWindowTitle('Low-fi: Low Frequency Induction Simulation')
+        self.setWindowTitle('SPE Low-fi | Low Frequency Induction Simulator')
         self.setWindowIcon(QtGui.QIcon('icons\web.png'))    
               
         """
@@ -53,12 +53,20 @@ class Window(QtGui.QWidget):
         saveAsAction.setStatusTip('Save project as')
         saveAsAction.triggered.connect(self.save_as_fn)
 
-
         openAction = QtGui.QAction(QtGui.QIcon('icons\open.ico'), '&Open', self)
         openAction.setShortcut('Ctrl+O')
         openAction.setStatusTip('Open project')
         openAction.triggered.connect(self.open_fn)
-
+        
+        aboutAction = QtGui.QAction('&About Low-Fi', self)
+        aboutAction.setStatusTip('About Low-Fi')
+        aboutAction.triggered.connect(self.about_dialog)
+        
+        helpAction = QtGui.QAction('&User Manual', self)
+        helpAction.setShortcut('F1')
+        helpAction.setStatusTip('Low-Fi user documentation')
+        helpAction.triggered.connect(self.user_manual)
+        
         """
         Menubar
         """
@@ -68,7 +76,10 @@ class Window(QtGui.QWidget):
         fileMenu.addAction(openAction)
         fileMenu.addSeparator()
         fileMenu.addAction(exitAction)
-        
+        helpMenu = menu_bar.addMenu('&Help')
+        helpMenu.addAction(helpAction)
+        helpMenu.addSeparator()
+        helpMenu.addAction(aboutAction)
                
         """
         Toolbar
@@ -162,6 +173,26 @@ class Window(QtGui.QWidget):
             #       - Some sort of error notification
             ###########################         
     
+    # Launch user manual
+    def user_manual(self):
+        os.system("start docs/low-fi-doc.pdf")
+    
+    # About dialog box
+    def about_dialog(self):
+        QtGui.QMessageBox.about(self, "About Low-Fi",
+                """<b>Low-Fi</b> is a low-frequency induction (LFI) simulator that is intended to calculate induced voltages on pipelines sharing a joint right-of-way with overhead powerlines.
+                   <p>
+                   This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+                   <p>
+                   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public License</a> for more details. 
+                   <p>
+                   Version: <b>v0.1 Beta<b><P>
+                   <p>
+                   Website: <a href="http://www.sigmapower.com.au/low-fi.html">www.sigmapower.com.au/low-fi.html</a>
+                   <p> </p>
+                   <p><img src="images/Sigma_Power.png"></p>
+                   <p>&copy; 2014 Sigma Power Engineering Pty Ltd</p>
+                   """)
     
 def main():
     

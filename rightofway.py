@@ -6,7 +6,7 @@ Low-fi: Low frequency induction simulation
 
 Right of Way Tab
 
-Author: Julius Susanto
+Authors: Julius Susanto and Tom Walker
 Last edited: January 2014
 """
 
