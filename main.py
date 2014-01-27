@@ -89,6 +89,11 @@ class Window(QtGui.QWidget):
         """
         
         """
+        Status line.
+        """
+        self.status_message = QtGui.QStatusBar()                 
+        
+        """
         Tabs
         """
         tab_widget = QtGui.QTabWidget()
@@ -111,15 +116,16 @@ class Window(QtGui.QWidget):
         page5 = results_ui(tab5)
         self.pages = [page1, page2, page3, page4, page5]
         
-        page1.setup()
-        page2.setup()
-        page3.setup()
-        page4.setup()
-        page5.setup()
+        page1.setup(self)
+        page2.setup(self)
+        page3.setup(self)
+        page4.setup(self)
+        page5.setup(self)
         
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(menu_bar)
         vbox.addWidget(tab_widget) 
+        vbox.addWidget(self.status_message)
         
         self.setLayout(vbox)
         
@@ -137,23 +143,41 @@ class Window(QtGui.QWidget):
         for p in self.pages:
             p.refresh_data()
             
+    def show_status_message(self, message, error = False, beep = False):
+        """Display a status message on the status line.
+           If error is True the status text will be coloured red.
+           If beep is True then the application will beep.
+        """
+        if(error):
+            self.status_message.setStyleSheet('QStatusBar {color: red}')
+        else:
+            self.status_message.setStyleSheet('')
+        if beep:
+            QApplication.beep()
+        self.status_message.showMessage(message)
 
     def save_as_fn(self):
         """Function for the Save As action."""
-        if globals.write_project_to_file(QtGui.QFileDialog.getSaveFileName(self, "Save Data File As", "", "LowFi project files (*.lfi)")):
-            return
-        print("Error writing to file or Save As cancelled.")
+        fname = QtGui.QFileDialog.getSaveFileName(self, "Save Data File As", "", "LowFi project files (*.lfi)")
+        if fname:
+            if globals.write_project_to_file(fname):
+                self.show_status_message("Write to file " + fname + " successful.")
+                self.refresh_data()                
+            else:
+                self.show_status_message("Failed to save " + fname + ".", error = True, beep = True)
+        else:
+            self.show_status_message("Save As cancelled.")                   
             ###########################
             # TO DO - Distinguish between cancel and failure
-            #       - Some sort of error notification
             #       - Put open filename in title bar
             ###########################
             
     def save_fn(self):    
         """Function for the Save action."""
         if globals.filename != "":
-            if globals.write_project_to_file(globals.filename):
-                return                    
+            if globals.write_project_to_file(globals.filename):                
+                self.refresh_data()        
+                return
         ###########################
         # TO DO - Some sort of error notification
         ###########################
@@ -164,14 +188,15 @@ class Window(QtGui.QWidget):
         # TO DO - Confirmation for opening file if data is unsaved
         #       - Put open filename in title bar
         ###########################
-        if globals.load_project_from_file(QtGui.QFileDialog.getOpenFileName(self, "Open Data File", "", "LowFi project files (*.lfi)")):
-            self.refresh_data()
+        fname = QtGui.QFileDialog.getOpenFileName(self, "Open Data File", "", "LowFi project files (*.lfi)")
+        if fname:
+            if globals.load_project_from_file(fname):                
+                self.refresh_data()
+                self.show_status_message("File " + fname + " successfully loaded.")
+            else:
+                self.show_status_message("Failed to open " + fname + ".", error = True, beep = True)
         else:
-            print("Error opening file or file open cancelled.")
-            ###########################
-            # TO DO - Distinguish between cancel and failure
-            #       - Some sort of error notification
-            ###########################         
+            self.show_status_message("Open Data File cancelled.")
     
     # Launch user manual
     def user_manual(self):

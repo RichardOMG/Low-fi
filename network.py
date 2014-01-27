@@ -14,10 +14,13 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import globals
+import utility
                       
 class network_ui(QtGui.QVBoxLayout): 
     
-    def setup(self):
+    def setup(self, window):
+        
+        self.main_window = window   
         
         heading_font = QtGui.QFont()
         heading_font.setPointSize(10)
@@ -149,16 +152,16 @@ class network_ui(QtGui.QVBoxLayout):
         grid.setAlignment(Qt.AlignTop)
         self.addLayout(grid)
         
-        self.le1.editingFinished.connect(self.update_data)
-        self.le3a.editingFinished.connect(self.update_data)
-        self.le3b.editingFinished.connect(self.update_data)
-        self.le4a.editingFinished.connect(self.update_data)
-        self.le4b.editingFinished.connect(self.update_data)
-        self.le5a.editingFinished.connect(self.update_data)
-        self.le5b.editingFinished.connect(self.update_data)
-        self.le7.editingFinished.connect(self.update_data)
-        self.le8.editingFinished.connect(self.update_data)
-        self.le9.editingFinished.connect(self.update_data)
+        self.le1.editingFinished.connect(utility.create_validation_hook(self, self.le1, "System frequency", 0.0, float("inf")))
+        self.le3a.editingFinished.connect(utility.create_validation_hook(self, self.le3a, "Phase A current", 0.0, float("inf")))
+        self.le3b.editingFinished.connect(utility.create_validation_hook(self, self.le3b, "Phase A angle", -180.0, 180.0))
+        self.le4a.editingFinished.connect(utility.create_validation_hook(self, self.le4a, "Phase B current", 0.0, float("inf")))
+        self.le4b.editingFinished.connect(utility.create_validation_hook(self, self.le4b, "Phase B angle", -180.0, 180.0))
+        self.le5a.editingFinished.connect(utility.create_validation_hook(self, self.le5a, "Phase C current", 0.0, float("inf")))
+        self.le5b.editingFinished.connect(utility.create_validation_hook(self, self.le5b, "Phase C angle", -180.0, 180.0))
+        self.le7.editingFinished.connect(utility.create_validation_hook(self, self.le7, "Maximum earth fault current", 0.0, float("inf")))
+        self.le8.editingFinished.connect(utility.create_validation_hook(self, self.le8, "Earth fault split factor", 0.0, 1.0, l_inclusive = True, u_inclusive = True))
+        self.le9.editingFinished.connect(utility.create_validation_hook(self, self.le9, "Shielding factor", 0.0, 1.0, l_inclusive = True, u_inclusive = True))
 
     def update_data(self):
         globals.network_data["freq"] = float(self.le1.text())

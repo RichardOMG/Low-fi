@@ -68,9 +68,10 @@ def init():
         "shield_factor"     : 0.8
         }
 
+
     global filename   
     filename = ""    
-
+    
 
 
 def write_project_to_file(fname, data = False, readable = True):
@@ -86,9 +87,12 @@ def write_project_to_file(fname, data = False, readable = True):
     :param readable: Optional argument.  True if output should be formatted to be more easily readable.
     :type readable: Boolean
     :returns: True if the write was successful."""    
-    global filename    
+    global filename
+    global no_sections    
     if not data:    
         data = dict()    
+        if no_sections != len(sections):
+            no_sections = len(sections)
         data['no_sections'] = no_sections
         data['sections'] = sections
         data['tower_data'] = tower_data
@@ -111,6 +115,8 @@ def write_project_to_file(fname, data = False, readable = True):
 def load_project_from_file(fname, populate = True):
     """Load project settings and data from file.  Uses simplejson library.
     Global variables will be populated from data in file unless otherwise directed.
+    
+    Checks that input data is numerical however does not ensure it is within standard boundaries.
     
     :param fname: String of file (name and path) to read from.
     :type fname: String

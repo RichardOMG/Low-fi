@@ -14,10 +14,13 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import globals
+import utility
                       
 class pipeline_ui(QtGui.QVBoxLayout): 
     
-    def setup(self):
+    def setup(self, window):
+        
+        self.main_window = window   
                 
         label1 = QtGui.QLabel('Pipe diameter')
         label1.setFixedWidth(150)
@@ -116,13 +119,14 @@ class pipeline_ui(QtGui.QVBoxLayout):
         grid.setAlignment(Qt.AlignTop)
         self.addLayout(grid)
         
-        self.le1.editingFinished.connect(self.update_data)
-        self.le2.editingFinished.connect(self.update_data)
-        self.le3.editingFinished.connect(self.update_data)
-        self.le4.editingFinished.connect(self.update_data)
-        self.le5.editingFinished.connect(self.update_data)
-        self.le6.editingFinished.connect(self.update_data)
-        self.le7.editingFinished.connect(self.update_data)
+        self.le1.editingFinished.connect(utility.create_validation_hook(self, self.le1, "Pipe diameter", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
+        self.le2.editingFinished.connect(utility.create_validation_hook(self, self.le2, "Pipe resistivity", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
+        self.le3.editingFinished.connect(utility.create_validation_hook(self, self.le3, "Pipe permeability", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
+        self.le4.editingFinished.connect(utility.create_validation_hook(self, self.le4, "Soil resistivity", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
+        self.le5.editingFinished.connect(utility.create_validation_hook(self, self.le5, "Coating thickness", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
+        self.le6.editingFinished.connect(utility.create_validation_hook(self, self.le6, "Coating resistivity", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
+        self.le7.editingFinished.connect(utility.create_validation_hook(self, self.le7, "Coating permeability", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
+                    
 
     def update_data(self):
         globals.pipe_data["diameter"] = float(self.le1.text())

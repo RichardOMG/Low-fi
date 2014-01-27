@@ -15,6 +15,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import os, sys
 import globals
+import utility
 import numpy as np
 import dateutil, pyparsing
 import matplotlib.pyplot as plt
@@ -22,7 +23,9 @@ import matplotlib.pyplot as plt
                       
 class results_ui(QtGui.QVBoxLayout): 
     
-    def setup(self):
+    def setup(self, window):
+        
+        self.main_window = window   
         
         label1 = QtGui.QLabel('Select study:')
         label1.setFixedWidth(80)

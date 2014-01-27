@@ -14,10 +14,13 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import globals
+import utility
                       
 class towergeo_ui(QtGui.QVBoxLayout): 
     
-    def setup(self):
+    def setup(self, window):
+        
+        self.main_window = window        
         
         img1 = QtGui.QLabel()
         img1.setPixmap(QtGui.QPixmap('images\Tower_Geo.png'))
@@ -143,17 +146,17 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         grid.addLayout(inner_grid, 0, 1)
         
-        self.addLayout(grid)
-        
-        self.le1.editingFinished.connect(self.update_data)
-        self.le2.editingFinished.connect(self.update_data)
-        self.le3.editingFinished.connect(self.update_data)
-        self.le4.editingFinished.connect(self.update_data)
-        self.le5.editingFinished.connect(self.update_data)
-        self.le6.editingFinished.connect(self.update_data)
-        self.le7.editingFinished.connect(self.update_data)
-        self.le8a.editingFinished.connect(self.update_data)
-        self.le8b.editingFinished.connect(self.update_data)
+        self.addLayout(grid)        
+                
+        self.le1.editingFinished.connect(utility.create_validation_hook(self, self.le1, "L_ab", 0, float("inf")))
+        self.le2.editingFinished.connect(utility.create_validation_hook(self, self.le2, "L_ac", 0, float("inf")))
+        self.le3.editingFinished.connect(utility.create_validation_hook(self, self.le3, "L_aw", 0, float("inf")))
+        self.le4.editingFinished.connect(utility.create_validation_hook(self, self.le4, "H_a", 0, float("inf")))
+        self.le5.editingFinished.connect(utility.create_validation_hook(self, self.le5, "H_b", 0, float("inf")))
+        self.le6.editingFinished.connect(utility.create_validation_hook(self, self.le6, "H_c", 0, float("inf")))
+        self.le7.editingFinished.connect(utility.create_validation_hook(self, self.le7, "H_w", 0, float("inf")))
+        self.le8a.editingFinished.connect(utility.create_validation_hook(self, self.le8a, "Z_w (real component)", 0, float("inf")))
+        self.le8b.editingFinished.connect(utility.create_validation_hook(self, self.le8b, "Z_w (real component)", 0, float("inf")))
 
     # Update global tower object on change event
     def update_data(self):
