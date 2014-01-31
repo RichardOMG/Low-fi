@@ -13,7 +13,7 @@ Last edited: January 2014
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-import numpy
+import numpy as np
 import globals
 import utility
                       
@@ -61,10 +61,74 @@ class rightofway_ui(QtGui.QVBoxLayout):
         
         update_button.clicked.connect(self.buttonClicked)
         self.tableWidget.itemChanged.connect(self.update_data_matrix)
+
+        # Copy/Paste right click menu       
+        copyAction = QtGui.QAction('&Copy', self)
+        copyAction.setShortcut('Ctrl+C')
+        copyAction.setStatusTip('Copy')
+        copyAction.triggered.connect(self.copy_fn)        
+        
+        pasteAction = QtGui.QAction('&Paste', self)
+        pasteAction.setShortcut('Ctrl+V')
+        pasteAction.setStatusTip('Paste')
+        pasteAction.triggered.connect(self.paste_fn)    
+
+        self.tableWidget.addAction(copyAction)
+        self.tableWidget.addAction(pasteAction)
+        self.tableWidget.setContextMenuPolicy(Qt.ActionsContextMenu)
+        
+        # Set selection behaviour
+        self.tableWidget.setSelectionMode(QAbstractItemView.ContiguousSelection)
+        
+        self.tableWidget.setAlternatingRowColors(True)
+
+    
+    def copy_fn(self):
+        """Function for the Copy action."""
+        # get active element
+        # find selected text in element
+        # load into clipboard
+        if len(self.tableWidget.selectedRanges()) > 1:
+            self.main_window.show_status_message("Copy command cannot be used with multiple ranges selected.", error = True, beep = True)
+            return
+        rows = self.tableWidget.selectedRanges()[0].rowCount()
+        columns = self.tableWidget.selectedRanges()[0].columnCount()
+        # For some reason the selectedIndexes output is transposed, so we have to transpose it
+        data = np.array([ index.data() for index in self.tableWidget.selectedIndexes() ])
+        data.resize((columns, rows))
+        data = np.transpose(data).flatten()        
+        delimiters = ([ "\t" for c in range(columns - 1) ] + ["\n"]) * rows        
+        copy = [char for pair in zip(data, delimiters) for char in pair]
+        copy = ''.join(copy)
+        QApplication.clipboard().setText(copy)
+        pass
+
+    def paste_fn(self):
+        """Function for the Paste action."""
+        # There might be a more elegant way of doing this..
+        try:
+            data = QApplication.clipboard().text()
+            data = [ [ float(val) for val in line.split('\t') if len(val) > 0 ] for line in data.split('\n') if len(line) > 0 ]        
+            if len(self.tableWidget.selectedIndexes()) > 0 and len(data) > 0:
+                data_rows = len(data)
+                data_columns = len(data[0])
+                table_rows = self.tableWidget.rowCount()
+                table_columns = self.tableWidget.columnCount()
+                active_row = self.tableWidget.selectedIndexes()[0].row()
+                active_column = self.tableWidget.selectedIndexes()[0].column()
+                selection = QtGui.QItemSelection(self.tableWidget.model().index(active_row, active_column), self.tableWidget.model().index(active_row + data_rows - 1, active_column + data_columns - 1))
+                self.tableWidget.selectionModel().select(selection, QItemSelectionModel.ClearAndSelect)
+                if active_row + data_rows > table_rows or active_column + data_columns > table_columns:
+                    self.main_window.show_status_message("Clipboard data too large.", error = True, beep = True)
+                else:                    
+                    for r in range(data_rows):
+                        for c in range(data_columns):
+                            self.tableWidget.item(r + active_row, c + active_column).setText(str(data[r][c]))                                
+        except:
+            self.main_window.show_status_message("Clipboard data invalid.", error = True, beep = True)
     
     # Update number of sections in right of way
     def buttonClicked(self, tableWidget):      
-        #self.tableWidget.setRowCount(globals.no_sections)        
         globals.sections.resize((globals.no_sections,3))
         for row in range(self.tableWidget.rowCount(), globals.no_sections):
             globals.sections[row, 0] = 1.0                            
@@ -86,6 +150,7 @@ class rightofway_ui(QtGui.QVBoxLayout):
             value = utility.validate(tableWidgetItem.text(), lower_bound, upper_bound, l_inclusive = False, u_inclusive = False)
         elif tableWidgetItem.column() == 1:
             element = "Separation"
+            lower_bound = -1.0 * float("inf")
             value = utility.validate(tableWidgetItem.text(), lower_bound, upper_bound, l_inclusive = True, u_inclusive = False)
         elif tableWidgetItem.column() == 2:
             element = "Earth"
