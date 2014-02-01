@@ -8,9 +8,10 @@ Authors: Julius Susanto and Tom Walker
 Last edited: January 2014
 """
 
-#from PyQt4 import QtCore, QtGui
-#from PyQt4.QtCore import *
-#from PyQt4.QtGui import *
+from PyQt4 import QtCore, QtGui
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+import numpy as np
 
 def validate(input_value, lower_bound, upper_bound, l_inclusive = True, u_inclusive = True):
     """Check if value is within allowable range.
@@ -73,6 +74,72 @@ def create_validation_hook(gui, text_field, description, lower_bound, upper_boun
 
 
 
-# validate data
-# if successful, update text field
-# if failed, update status message
+class LowFiTable(QtGui.QTableWidget): 
+    """Overloaded version of the QTableWidget which adds Copy/Paste functionality to the table."""
+    
+    def setup(self, main_window, allowCopy = True, allowPaste = True):
+        """Set up table."""
+        self.main_window = main_window
+        
+        if allowCopy:
+            copyAction = QtGui.QAction('&Copy', self)
+            copyAction.setShortcut('Ctrl+C')
+            copyAction.setStatusTip('Copy')
+            copyAction.triggered.connect(self.copy_fn)        
+            self.addAction(copyAction)            
+
+        if allowPaste:                
+            pasteAction = QtGui.QAction('&Paste', self)
+            pasteAction.setShortcut('Ctrl+V')
+            pasteAction.setStatusTip('Paste')
+            pasteAction.triggered.connect(self.paste_fn)       
+            self.addAction(pasteAction)
+
+        if allowCopy or allowPaste:                
+            self.setContextMenuPolicy(Qt.ActionsContextMenu)
+            self.setSelectionMode(QAbstractItemView.ContiguousSelection)
+
+            
+    def copy_fn(self):
+        """Function for the Copy action."""
+        # get active element
+        # find selected text in element
+        # load into clipboard
+        if len(self.selectedRanges()) > 1:
+            self.main_window.show_status_message("Copy command cannot be used with multiple ranges selected.", error = True, beep = True)
+            return
+        rows = self.selectedRanges()[0].rowCount()
+        columns = self.selectedRanges()[0].columnCount()
+        # For some reason the selectedIndexes output is transposed, so we have to transpose it
+        data = np.array([ index.data() for index in self.selectedIndexes() ])
+        data.resize((columns, rows))
+        data = np.transpose(data).flatten()        
+        delimiters = ([ "\t" for c in range(columns - 1) ] + ["\n"]) * rows        
+        copy = [char for pair in zip(data, delimiters) for char in pair]
+        copy = ''.join(copy)
+        QApplication.clipboard().setText(copy)
+        pass
+
+    def paste_fn(self):
+        """Function for the Paste action."""
+        # There might be a more elegant way of doing this..
+        try:
+            data = QApplication.clipboard().text()
+            data = [ [ float(val) for val in line.split('\t') if len(val) > 0 ] for line in data.split('\n') if len(line) > 0 ]        
+            if len(self.selectedIndexes()) > 0 and len(data) > 0:
+                data_rows = len(data)
+                data_columns = len(data[0])
+                table_rows = self.rowCount()
+                table_columns = self.columnCount()
+                active_row = self.selectedIndexes()[0].row()
+                active_column = self.selectedIndexes()[0].column()
+                selection = QtGui.QItemSelection(self.model().index(active_row, active_column), self.model().index(active_row + data_rows - 1, active_column + data_columns - 1))
+                self.selectionModel().select(selection, QItemSelectionModel.ClearAndSelect)
+                if active_row + data_rows > table_rows or active_column + data_columns > table_columns:
+                    self.main_window.show_status_message("Clipboard data too large.", error = True, beep = True)
+                else:                    
+                    for r in range(data_rows):
+                        for c in range(data_columns):
+                            self.item(r + active_row, c + active_column).setText(str(data[r][c]))                                
+        except:
+            self.main_window.show_status_message("Clipboard data invalid.", error = True, beep = True)    

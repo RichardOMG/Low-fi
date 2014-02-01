@@ -30,7 +30,6 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le1 = QtGui.QLineEdit()
         self.le1.setFixedWidth(50)
-        self.le1.setText(str(globals.tower_data["L_ab"]))
         
         label1a = QtGui.QLabel('m')
         label1a.setFixedWidth(10)
@@ -40,7 +39,6 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le2 = QtGui.QLineEdit()
         self.le2.setFixedWidth(50)
-        self.le2.setText(str(globals.tower_data["L_ac"]))
         
         label2a = QtGui.QLabel('m')
         label2a.setFixedWidth(10)
@@ -50,7 +48,6 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le3 = QtGui.QLineEdit()
         self.le3.setFixedWidth(50)
-        self.le3.setText(str(globals.tower_data["L_aw"]))
         
         label3a = QtGui.QLabel('m')
         label3a.setFixedWidth(10)
@@ -60,7 +57,6 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le4 = QtGui.QLineEdit()
         self.le4.setFixedWidth(50)
-        self.le4.setText(str(globals.tower_data["H_a"]))
         
         label4a = QtGui.QLabel('m')
         label4a.setFixedWidth(10)
@@ -70,7 +66,6 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le5 = QtGui.QLineEdit()
         self.le5.setFixedWidth(50)
-        self.le5.setText(str(globals.tower_data["H_b"]))
         
         label5a = QtGui.QLabel('m')
         label5a.setFixedWidth(10)
@@ -80,7 +75,6 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le6 = QtGui.QLineEdit()
         self.le6.setFixedWidth(50)
-        self.le6.setText(str(globals.tower_data["H_c"]))
         
         label6a = QtGui.QLabel('m')
         label6a.setFixedWidth(10)
@@ -90,7 +84,6 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le7 = QtGui.QLineEdit()
         self.le7.setFixedWidth(50)
-        self.le7.setText(str(globals.tower_data["H_w"]))
         
         label7a = QtGui.QLabel('m')
         label7a.setFixedWidth(10)
@@ -100,14 +93,12 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         self.le8a = QtGui.QLineEdit()
         self.le8a.setFixedWidth(50)
-        self.le8a.setText(str(globals.tower_data["Z_w"].real))
         
         label8a = QtGui.QLabel('+ j')
         label8a.setFixedWidth(15)
         
         self.le8b = QtGui.QLineEdit()
         self.le8b.setFixedWidth(50)
-        self.le8b.setText(str(globals.tower_data["Z_w"].imag))
         
         label8b = QtGui.QLabel('Ohm')
         label8b.setFixedWidth(25)
@@ -146,7 +137,9 @@ class towergeo_ui(QtGui.QVBoxLayout):
         
         grid.addLayout(inner_grid, 0, 1)
         
-        self.addLayout(grid)        
+        self.addLayout(grid)
+        
+        self.refresh_data()
                 
         self.le1.editingFinished.connect(utility.create_validation_hook(self, self.le1, "L_ab", 0, float("inf")))
         self.le2.editingFinished.connect(utility.create_validation_hook(self, self.le2, "L_ac", 0, float("inf")))

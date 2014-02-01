@@ -27,7 +27,6 @@ class pipeline_ui(QtGui.QVBoxLayout):
         
         self.le1 = QtGui.QLineEdit()
         self.le1.setFixedWidth(80)
-        self.le1.setText(str(globals.pipe_data["diameter"]))
         
         label1a = QtGui.QLabel('m')
         label1a.setFixedWidth(40)
@@ -37,7 +36,6 @@ class pipeline_ui(QtGui.QVBoxLayout):
         
         self.le2 = QtGui.QLineEdit()
         self.le2.setFixedWidth(80)
-        self.le2.setText(str(globals.pipe_data["pipe_rho"]))
         
         label2a = QtGui.QLabel('Ohm.m')
         label2a.setFixedWidth(40)
@@ -47,7 +45,6 @@ class pipeline_ui(QtGui.QVBoxLayout):
         
         self.le3 = QtGui.QLineEdit()
         self.le3.setFixedWidth(80)
-        self.le3.setText(str(globals.pipe_data["pipe_mu"]))
         
         label3a = QtGui.QLabel('')
         label3a.setFixedWidth(40)
@@ -57,7 +54,6 @@ class pipeline_ui(QtGui.QVBoxLayout):
         
         self.le4 = QtGui.QLineEdit()
         self.le4.setFixedWidth(80)
-        self.le4.setText(str(globals.pipe_data["soil_rho"]))
         
         label4a = QtGui.QLabel('Ohm.m')
         label4a.setFixedWidth(40)
@@ -67,7 +63,6 @@ class pipeline_ui(QtGui.QVBoxLayout):
         
         self.le5 = QtGui.QLineEdit()
         self.le5.setFixedWidth(80)
-        self.le5.setText(str(globals.pipe_data["coat_thickness"]))
         
         label5a = QtGui.QLabel('m')
         label5a.setFixedWidth(40)
@@ -77,7 +72,6 @@ class pipeline_ui(QtGui.QVBoxLayout):
         
         self.le6 = QtGui.QLineEdit()
         self.le6.setFixedWidth(80)
-        self.le6.setText(str(globals.pipe_data["coat_rho"]))
         
         label6a = QtGui.QLabel('m')
         label6a.setFixedWidth(40)
@@ -87,7 +81,6 @@ class pipeline_ui(QtGui.QVBoxLayout):
         
         self.le7 = QtGui.QLineEdit()
         self.le7.setFixedWidth(80)
-        self.le7.setText(str(globals.pipe_data["coat_mu"]))
         
         label7a = QtGui.QLabel('')
         label7a.setFixedWidth(40)
@@ -118,6 +111,8 @@ class pipeline_ui(QtGui.QVBoxLayout):
         
         grid.setAlignment(Qt.AlignTop)
         self.addLayout(grid)
+        
+        self.refresh_data()        
         
         self.le1.editingFinished.connect(utility.create_validation_hook(self, self.le1, "Pipe diameter", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
         self.le2.editingFinished.connect(utility.create_validation_hook(self, self.le2, "Pipe resistivity", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))

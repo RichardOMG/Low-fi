@@ -31,7 +31,6 @@ class network_ui(QtGui.QVBoxLayout):
         
         self.le1 = QtGui.QLineEdit()
         self.le1.setFixedWidth(80)
-        self.le1.setText(str(globals.network_data["freq"]))
         
         label1a = QtGui.QLabel('Hz')
         label1a.setFixedWidth(40)
@@ -45,14 +44,12 @@ class network_ui(QtGui.QVBoxLayout):
         
         self.le3a = QtGui.QLineEdit()
         self.le3a.setFixedWidth(50)
-        self.le3a.setText(str(globals.network_data["current_a"]))
         
         label3a = QtGui.QLabel('A')
         label3a.setFixedWidth(10)
         
         self.le3b = QtGui.QLineEdit()
         self.le3b.setFixedWidth(50)
-        self.le3b.setText(str(globals.network_data["angle_a"]))
         
         label3b = QtGui.QLabel('deg')
         label3b.setFixedWidth(20)
@@ -62,14 +59,12 @@ class network_ui(QtGui.QVBoxLayout):
         
         self.le4a = QtGui.QLineEdit()
         self.le4a.setFixedWidth(50)
-        self.le4a.setText(str(globals.network_data["current_b"]))
         
         label4a = QtGui.QLabel('A')
         label4a.setFixedWidth(10)
         
         self.le4b = QtGui.QLineEdit()
         self.le4b.setFixedWidth(50)
-        self.le4b.setText(str(globals.network_data["angle_b"]))
         
         label4b = QtGui.QLabel('deg')
         label4b.setFixedWidth(20)
@@ -79,14 +74,12 @@ class network_ui(QtGui.QVBoxLayout):
         
         self.le5a = QtGui.QLineEdit()
         self.le5a.setFixedWidth(50)
-        self.le5a.setText(str(globals.network_data["current_c"]))
         
         label5a = QtGui.QLabel('A')
         label5a.setFixedWidth(10)
         
         self.le5b = QtGui.QLineEdit()
         self.le5b.setFixedWidth(50)
-        self.le5b.setText(str(globals.network_data["angle_c"]))
         
         label5b = QtGui.QLabel('deg')
         label5b.setFixedWidth(20)
@@ -100,7 +93,6 @@ class network_ui(QtGui.QVBoxLayout):
         
         self.le7 = QtGui.QLineEdit()
         self.le7.setFixedWidth(50)
-        self.le7.setText(str(globals.network_data["fault_current"]))
         
         label7a = QtGui.QLabel('kA')
         label7a.setFixedWidth(15)
@@ -110,14 +102,12 @@ class network_ui(QtGui.QVBoxLayout):
         
         self.le8 = QtGui.QLineEdit()
         self.le8.setFixedWidth(50)
-        self.le8.setText(str(globals.network_data["split_factor"]))
         
         label9 = QtGui.QLabel('Shielding factor')
         label9.setFixedWidth(150)
         
         self.le9 = QtGui.QLineEdit()
         self.le9.setFixedWidth(50)
-        self.le9.setText(str(globals.network_data["shield_factor"]))
         
         grid = QtGui.QGridLayout()
         
@@ -151,6 +141,8 @@ class network_ui(QtGui.QVBoxLayout):
         
         grid.setAlignment(Qt.AlignTop)
         self.addLayout(grid)
+        
+        self.refresh_data()        
         
         self.le1.editingFinished.connect(utility.create_validation_hook(self, self.le1, "System frequency", 0.0, float("inf")))
         self.le3a.editingFinished.connect(utility.create_validation_hook(self, self.le3a, "Phase A current", 0.0, float("inf")))

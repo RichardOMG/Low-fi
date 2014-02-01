@@ -35,7 +35,7 @@ class results_ui(QtGui.QVBoxLayout):
         self.combo.addItem("Fault LFI")
         
         calc_button = QtGui.QPushButton("Calculate")
-        calc_button.setFixedWidth(80)
+        calc_button.setFixedWidth(80)       
         
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(label1)
@@ -49,9 +49,34 @@ class results_ui(QtGui.QVBoxLayout):
         
         self.addLayout(vbox)
         calc_button.clicked.connect(self.calculate)
+        
+        # Scrolling groupbox
+        groupbox = QtGui.QGroupBox()
+        groupbox.setTitle("Calculation Results")
+        scrollarea = QtGui.QScrollArea()
+        scrollarea.setWidget(groupbox)               
+        scrollarea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scrollarea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scrollarea.setWidgetResizable(True)
+        scrollarea.setFixedHeight(500)      
+        self.results_layout = QtGui.QVBoxLayout()
+        self.results_layout.setAlignment(Qt.AlignTop)       
+        groupbox.setLayout(self.results_layout)  
+        
+        scrollarea.hide()
+        
+        vbox.addWidget(scrollarea)
+        
     
     # Calculate load and fault LFI voltages on the pipeline
     def calculate(self, tableWidget):
+
+        # on calculation
+        #  populate widget with tables for calculation steps
+        #  
+        # add export button to export to file
+        # include save calculated values to file??        
+
         
         # Pipeline longitudinal series impedance (in Ohm/km) - from CIGRE WG 36.02 Appendix G
         omega = 2 * np.pi * globals.network_data["freq"]

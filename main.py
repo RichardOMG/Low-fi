@@ -29,7 +29,7 @@ class Window(QtGui.QWidget):
         self.initUI()
         
     def initUI(self):
-        
+                
         self.resize(700, 500)
         self.centre()
         self.setWindowTitle('SPE Low-fi | Low Frequency Induction Simulator')
@@ -65,7 +65,7 @@ class Window(QtGui.QWidget):
         helpAction = QtGui.QAction('&User Manual', self)
         helpAction.setShortcut('F1')
         helpAction.setStatusTip('Low-Fi user documentation')
-        helpAction.triggered.connect(self.user_manual)
+        helpAction.triggered.connect(self.user_manual)   
         
         """
         Menubar
@@ -125,7 +125,7 @@ class Window(QtGui.QWidget):
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(menu_bar)
         vbox.addWidget(tab_widget) 
-        vbox.addWidget(self.status_message)
+        vbox.addWidget(self.status_message)        
         
         self.setLayout(vbox)
         
