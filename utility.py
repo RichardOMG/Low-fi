@@ -76,6 +76,17 @@ def create_validation_hook(gui, text_field, description, lower_bound, upper_boun
 
 class LowFiTable(QtGui.QTableWidget): 
     """Overloaded version of the QTableWidget which adds Copy/Paste functionality to the table."""
+
+    def __init__(self, main_window, data = [], headings = [], allowCopy = True, allowPaste = True, readOnly = False, alternatingRowColors = False):
+        """Constructor which will set up Copy & Paste actions and populate table headings and data."""
+        super(QtGui.QTableWidget, self).__init__()                
+        self.setup(main_window, allowCopy, allowPaste)
+        if len(data) > 0:
+            self.fill_table(data, readOnly)
+        if len(headings) > 0:
+            self.setColumnCount(len(headings))            
+            self.setHorizontalHeaderLabels(headings)
+        self.setAlternatingRowColors(alternatingRowColors)
     
     def setup(self, main_window, allowCopy = True, allowPaste = True):
         """Set up table."""
@@ -143,3 +154,19 @@ class LowFiTable(QtGui.QTableWidget):
                             self.item(r + active_row, c + active_column).setText(str(data[r][c]))                                
         except:
             self.main_window.show_status_message("Clipboard data invalid.", error = True, beep = True)    
+    
+    def fill_table(self, data, readOnly = False):
+        """Fill table from 2D list or numpy array."""
+        if len(data) > 0:
+            data_rows = len(data)
+            data_columns = len(data[0])
+            if data_columns > 0:
+                self.setRowCount(data_rows)
+                self.setColumnCount(data_columns)
+                for r in range(0, data_rows):
+                    for c in range(0, data_columns):
+                        item = QTableWidgetItem()
+                        item.setText(str(data[r][c]))
+                        if readOnly:
+                            item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                        self.setItem(r, c, item)                        

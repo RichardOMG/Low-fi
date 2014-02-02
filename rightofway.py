@@ -38,10 +38,8 @@ class rightofway_ui(QtGui.QVBoxLayout):
         hbox.addWidget(update_button)
         hbox.setAlignment(Qt.AlignLeft)
         
-        self.tableWidget = utility.LowFiTable(globals.no_sections, 4)
-        self.tableWidget.setup(window)        
-        self.tableWidget.setHorizontalHeaderLabels(['Section Length (m)', 'Separation (m)', 'Earth (Ohms)', 'Soil rho (Ohm.m)'])
-        self.tableWidget.setAlternatingRowColors(True)
+        headings = ['Section Length (m)', 'Separation (m)', 'Earth (Ohms)', 'Soil rho (Ohm.m)']
+        self.tableWidget = utility.LowFiTable(window, headings = headings, alternatingRowColors = True)
                     
         self.addLayout(hbox) 
         self.addWidget(self.tableWidget)
@@ -103,11 +101,12 @@ class rightofway_ui(QtGui.QVBoxLayout):
         """Update text fields to match global variables."""
         self.tableWidget.setRowCount(globals.no_sections)
         self.le.setText(str(globals.no_sections))
-        for row in range(0, self.tableWidget.rowCount()):
-            for col in range(0,4):
-                item = QTableWidgetItem()
-                item.setText(str(globals.sections[row, col]))
-                self.tableWidget.setItem(row, col, item)
+        self.tableWidget.fill_table(globals.sections)
+        #for row in range(0, self.tableWidget.rowCount()):
+        #    for col in range(0,4):
+        #        item = QTableWidgetItem()
+        #        item.setText(str(globals.sections[row, col]))
+        #        self.tableWidget.setItem(row, col, item)
 
             
         
