@@ -20,8 +20,16 @@ class pipeline_ui(QtGui.QVBoxLayout):
     
     def setup(self, window):
         
-        self.main_window = window   
-                
+        self.main_window = window
+        
+        heading_font = QtGui.QFont()
+        heading_font.setPointSize(10)
+        heading_font.setBold(True)
+        
+        header1 = QtGui.QLabel('Pipeline Parameters')
+        header1.setFixedWidth(150)
+        header1.setFont(heading_font)
+        
         label1 = QtGui.QLabel('Pipe diameter')
         label1.setFixedWidth(150)
         
@@ -49,14 +57,18 @@ class pipeline_ui(QtGui.QVBoxLayout):
         label3a = QtGui.QLabel('')
         label3a.setFixedWidth(40)
         
-        label4 = QtGui.QLabel('Soil resistivity')
-        label4.setFixedWidth(150)
+        #label4 = QtGui.QLabel('Soil resistivity')
+        #label4.setFixedWidth(150)
         
-        self.le4 = QtGui.QLineEdit()
-        self.le4.setFixedWidth(80)
+        #self.le4 = QtGui.QLineEdit()
+        #self.le4.setFixedWidth(80)
         
-        label4a = QtGui.QLabel('Ohm.m')
-        label4a.setFixedWidth(40)
+        #label4a = QtGui.QLabel('Ohm.m')
+        #label4a.setFixedWidth(40)
+        
+        header2 = QtGui.QLabel('Pipeline Coating Parameters')
+        header2.setFixedWidth(250)
+        header2.setFont(heading_font)
         
         label5 = QtGui.QLabel('Coating thickness')
         label5.setFixedWidth(150)
@@ -87,27 +99,29 @@ class pipeline_ui(QtGui.QVBoxLayout):
         
         grid = QtGui.QGridLayout()
         
-        grid.addWidget(label1, 0, 0)
-        grid.addWidget(self.le1, 0, 1)
-        grid.addWidget(label1a, 0, 2)
-        grid.addWidget(label2, 1, 0)
-        grid.addWidget(self.le2, 1, 1)
-        grid.addWidget(label2a, 1, 2)
-        grid.addWidget(label3, 2, 0)
-        grid.addWidget(self.le3, 2, 1)
-        grid.addWidget(label3a, 2, 2)
-        grid.addWidget(label4, 3, 0)
-        grid.addWidget(self.le4, 3, 1)
-        grid.addWidget(label4a, 3, 2)
-        grid.addWidget(label5, 4, 0)
-        grid.addWidget(self.le5, 4, 1)
-        grid.addWidget(label5a, 4, 2)
-        grid.addWidget(label6, 5, 0)
-        grid.addWidget(self.le6, 5, 1)
-        grid.addWidget(label6a, 5, 2)
-        grid.addWidget(label7, 6, 0)
-        grid.addWidget(self.le7, 6, 1)
-        grid.addWidget(label7a, 6, 2)
+        grid.addWidget(header1, 0, 0)
+        grid.addWidget(label1, 1, 0)
+        grid.addWidget(self.le1, 1, 1)
+        grid.addWidget(label1a, 1, 2)
+        grid.addWidget(label2, 2, 0)
+        grid.addWidget(self.le2, 2, 1)
+        grid.addWidget(label2a, 2, 2)
+        grid.addWidget(label3, 3, 0)
+        grid.addWidget(self.le3, 3, 1)
+        grid.addWidget(label3a, 3, 2)
+        #grid.addWidget(label4, 3, 0)
+        #grid.addWidget(self.le4, 3, 1)
+        #grid.addWidget(label4a, 3, 2)
+        grid.addWidget(header2, 4, 0)
+        grid.addWidget(label5, 5, 0)
+        grid.addWidget(self.le5, 5, 1)
+        grid.addWidget(label5a, 5, 2)
+        grid.addWidget(label6, 6, 0)
+        grid.addWidget(self.le6, 6, 1)
+        grid.addWidget(label6a, 6, 2)
+        grid.addWidget(label7, 7, 0)
+        grid.addWidget(self.le7, 7, 1)
+        grid.addWidget(label7a, 7, 2)
         
         grid.setAlignment(Qt.AlignTop)
         self.addLayout(grid)
@@ -117,7 +131,7 @@ class pipeline_ui(QtGui.QVBoxLayout):
         self.le1.editingFinished.connect(utility.create_validation_hook(self, self.le1, "Pipe diameter", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
         self.le2.editingFinished.connect(utility.create_validation_hook(self, self.le2, "Pipe resistivity", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
         self.le3.editingFinished.connect(utility.create_validation_hook(self, self.le3, "Pipe permeability", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
-        self.le4.editingFinished.connect(utility.create_validation_hook(self, self.le4, "Soil resistivity", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
+        #self.le4.editingFinished.connect(utility.create_validation_hook(self, self.le4, "Soil resistivity", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
         self.le5.editingFinished.connect(utility.create_validation_hook(self, self.le5, "Coating thickness", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
         self.le6.editingFinished.connect(utility.create_validation_hook(self, self.le6, "Coating resistivity", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
         self.le7.editingFinished.connect(utility.create_validation_hook(self, self.le7, "Coating permeability", 0.0, float("inf"), l_inclusive = False, u_inclusive = False))
@@ -127,7 +141,7 @@ class pipeline_ui(QtGui.QVBoxLayout):
         globals.pipe_data["diameter"] = float(self.le1.text())
         globals.pipe_data["pipe_rho"] = float(self.le2.text())
         globals.pipe_data["pipe_mu"] = float(self.le3.text())
-        globals.pipe_data["soil_rho"] = float(self.le4.text())
+        #globals.pipe_data["soil_rho"] = float(self.le4.text())
         globals.pipe_data["coat_thickness"] = float(self.le5.text())
         globals.pipe_data["coat_rho"] = float(self.le6.text())
         globals.pipe_data["coat_mu"] = float(self.le7.text())
@@ -137,7 +151,7 @@ class pipeline_ui(QtGui.QVBoxLayout):
         self.le1.setText(str(globals.pipe_data["diameter"]))
         self.le2.setText(str(globals.pipe_data["pipe_rho"]))
         self.le3.setText(str(globals.pipe_data["pipe_mu"]))
-        self.le4.setText(str(globals.pipe_data["soil_rho"]))
+        #self.le4.setText(str(globals.pipe_data["soil_rho"]))
         self.le5.setText(str(globals.pipe_data["coat_thickness"]))
         self.le6.setText(str(globals.pipe_data["coat_rho"]))
         self.le7.setText(str(globals.pipe_data["coat_mu"]))

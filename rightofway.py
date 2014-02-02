@@ -38,9 +38,9 @@ class rightofway_ui(QtGui.QVBoxLayout):
         hbox.addWidget(update_button)
         hbox.setAlignment(Qt.AlignLeft)
         
-        self.tableWidget = utility.LowFiTable(globals.no_sections, 3)
+        self.tableWidget = utility.LowFiTable(globals.no_sections, 4)
         self.tableWidget.setup(window)        
-        self.tableWidget.setHorizontalHeaderLabels(['Section Length (m)', 'Separation (m)', 'Earth (Ohms)'])
+        self.tableWidget.setHorizontalHeaderLabels(['Section Length (m)', 'Separation (m)', 'Earth (Ohms)', 'Soil rho (Ohm.m)'])
         self.tableWidget.setAlternatingRowColors(True)
                     
         self.addLayout(hbox) 
@@ -56,11 +56,12 @@ class rightofway_ui(QtGui.QVBoxLayout):
     
     # Update number of sections in right of way
     def buttonClicked(self, tableWidget):      
-        globals.sections.resize((globals.no_sections,3))
+        globals.sections.resize((globals.no_sections,4))
         for row in range(self.tableWidget.rowCount(), globals.no_sections):
             globals.sections[row, 0] = 1.0                            
             globals.sections[row, 1] = 1.0                            
-            globals.sections[row, 2] = 1.0      
+            globals.sections[row, 2] = 1.0   
+            globals.sections[row, 3] = 1.0             
         self.refresh_data()        
         
     
@@ -68,20 +69,23 @@ class rightofway_ui(QtGui.QVBoxLayout):
         globals.no_sections = int(self.le.text())
     
     # Update sections matrix whenever table data is changed
-    def update_data_matrix(self, tableWidgetItem):                        
+    def update_data_matrix(self, tableWidgetItem): 
         lower_bound = 0.0
         upper_bound = float("inf")
         value = 0.0
         if tableWidgetItem.column() == 0:
-            element = "Length"
+            element = "length"
             value = utility.validate(tableWidgetItem.text(), lower_bound, upper_bound, l_inclusive = False, u_inclusive = False)
         elif tableWidgetItem.column() == 1:
-            element = "Separation"
+            element = "separation"
             lower_bound = -1.0 * float("inf")
             value = utility.validate(tableWidgetItem.text(), lower_bound, upper_bound, l_inclusive = True, u_inclusive = False)
         elif tableWidgetItem.column() == 2:
-            element = "Earth"
+            element = "earth impedance"
             lower_bound = -1.0 * float("inf")
+            value = utility.validate(tableWidgetItem.text(), lower_bound, upper_bound, l_inclusive = False, u_inclusive = False)
+        elif tableWidgetItem.column() == 3:
+            element = "soil resistivity"
             value = utility.validate(tableWidgetItem.text(), lower_bound, upper_bound, l_inclusive = False, u_inclusive = False)
         if not value is False:        
             globals.sections[tableWidgetItem.row(), tableWidgetItem.column()] = float(tableWidgetItem.text())            
@@ -100,7 +104,7 @@ class rightofway_ui(QtGui.QVBoxLayout):
         self.tableWidget.setRowCount(globals.no_sections)
         self.le.setText(str(globals.no_sections))
         for row in range(0, self.tableWidget.rowCount()):
-            for col in range(0,3):
+            for col in range(0,4):
                 item = QTableWidgetItem()
                 item.setText(str(globals.sections[row, col]))
                 self.tableWidget.setItem(row, col, item)

@@ -79,19 +79,22 @@ class results_ui(QtGui.QVBoxLayout):
 
         
         # Pipeline longitudinal series impedance (in Ohm/km) - from CIGRE WG 36.02 Appendix G
+        # Real part (is constant as it does not depend on soil resistivity)
         omega = 2 * np.pi * globals.network_data["freq"]
         mu_0 = 4 * np.pi * 1e-7
         Zi_re = 1/(np.pi * globals.pipe_data["diameter"] * np.sqrt(2)) * ((omega * globals.pipe_data["pipe_rho"] * mu_0 * globals.pipe_data["pipe_mu"]) ** 0.5) + omega * mu_0 / 8
-        Zi_im = mu_0 * globals.network_data["freq"] * np.log((3.7/globals.pipe_data["diameter"]) * (globals.pipe_data["soil_rho"]/ (mu_0 * omega)) ** 0.5)
-        Z_i = complex(Zi_re * 1000, Zi_im * 1000)
         
         # Pipeline longitudinal shunt admittance (in Ohm^-1/km) - from CIGRE WG 36.02 Appendix G
+        # Applies only when coat_rho >> soil_rho
+        
+        ################################################
+        # TO DO - expanded formulation for general case 
+        #         (see Appendix G of CIGRE WG 36.02)
+        ################################################
+        
         Yi_re = np.pi * globals.pipe_data["diameter"] / globals.pipe_data["coat_rho"] / globals.pipe_data["coat_thickness"]
         Yi_im = omega * 8.85e-12 * globals.pipe_data["coat_mu"] * np.pi * globals.pipe_data["diameter"] / globals.pipe_data["coat_thickness"]
         Y_i = complex(Yi_re * 1000, Yi_im * 1000)
-        
-        # Return current depth
-        D_e = 658.37 * (globals.pipe_data["soil_rho"] / globals.network_data["freq"]) ** 0.5
         
         # Set up empty matrices Y_p (pipeline admittance), Y_e (earth admittance), V_p (LFI voltage)
         Y_p = np.zeros([globals.no_sections,2], dtype=complex)
@@ -104,6 +107,13 @@ class results_ui(QtGui.QVBoxLayout):
         I_c = complex(globals.network_data["current_c"] * np.cos(globals.network_data["angle_c"] * np.pi / 180), globals.network_data["current_c"] * np.sin(globals.network_data["angle_c"] * np.pi / 180))
         
         for row in range(0, globals.no_sections):
+            # Return current depth
+            D_e = 658.37 * (globals.sections[row,3] / globals.network_data["freq"]) ** 0.5
+            
+            # Pipeline longitudinal series impedance (in Ohm/km) - from CIGRE WG 36.02 Appendix G
+            Zi_im = mu_0 * globals.network_data["freq"] * np.log((3.7/globals.pipe_data["diameter"]) * (globals.sections[row,3] / (mu_0 * omega)) ** 0.5)
+            Z_i = complex(Zi_re * 1000, Zi_im * 1000)
+        
             # Compute pipeline admittances
             Y_p[row,0] = 1 / (Z_i * globals.sections[row,0] / 1000)
             Y_p[row,1] = Y_i * globals.sections[row,0] / 1000
@@ -130,11 +140,11 @@ class results_ui(QtGui.QVBoxLayout):
             D_bp = (L_b ** 2 + globals.tower_data["H_b"] ** 2) ** 0.5
             D_cp = (L_c ** 2 + globals.tower_data["H_c"] ** 2) ** 0.5
             
-            #########################################################
+            #####################################################
             # TO DO - Earth wire shielding factor calculation
-            #         At the moment, a user-defined shielding 
-            #         factor is used (a bit dodgy as can be "tuned")
-            #########################################################
+            #         for fault LFI
+            #####################################################
+            
             D_aw = (globals.tower_data["L_aw"] ** 2 + (globals.tower_data["H_w"] - globals.tower_data["H_a"]) ** 2) ** 0.5
             D_bw = ((globals.tower_data["L_aw"] - globals.tower_data["L_ab"]) ** 2 + (globals.tower_data["H_w"] - globals.tower_data["H_b"]) ** 2) ** 0.5
             D_cw = ((globals.tower_data["L_aw"] - globals.tower_data["L_ac"]) ** 2 + (globals.tower_data["H_w"] - globals.tower_data["H_c"]) ** 2) ** 0.5
