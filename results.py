@@ -115,7 +115,7 @@ class results_ui(QtGui.QVBoxLayout):
                 Y_e[row] = 0
             
             # Calculate effective (geometric mean) distances
-            if row < (globals.no_sections - 1):
+            if (row < (globals.no_sections - 1)) and (globals.sections[row + 1,1] > 0):
                 L_a = (globals.sections[row,1] * globals.sections[row + 1,1]) ** 0.5
                 L_b = ((globals.sections[row,1] + globals.tower_data["L_ab"]) * (globals.sections[row + 1,1] + globals.tower_data["L_ab"])) ** 0.5
                 L_c = ((globals.sections[row,1] + globals.tower_data["L_ac"]) * (globals.sections[row + 1,1] + globals.tower_data["L_ac"])) ** 0.5
@@ -163,12 +163,16 @@ class results_ui(QtGui.QVBoxLayout):
             Z_bpw = Z_bp - Z_bw * Z_wp / Z_w
             Z_cpw = Z_cp - Z_cw * Z_wp / Z_w
             
-            if self.combo.currentText() == "Load LFI":
-                # Load LFI (in V)
-                V_p[row,0] = (Z_apw * I_a + Z_bpw * I_b + Z_cpw * I_c) * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000
-            else:
-                # Fault LFI (in kV)
-                V_p[row,0] = Z_lp * globals.network_data["fault_current"] * globals.network_data["split_factor"] * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000        
+            if globals.sections[row,1] < 0:
+                # Non parallel section = no induced voltage
+                V_p[row,0] = 0
+            else:           
+                if self.combo.currentText() == "Load LFI":
+                    # Load LFI (in V)
+                    V_p[row,0] = (Z_apw * I_a + Z_bpw * I_b + Z_cpw * I_c) * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000
+                else:
+                    # Fault LFI (in kV)
+                    V_p[row,0] = Z_lp * globals.network_data["fault_current"] * globals.network_data["split_factor"] * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000        
         
         # LFI voltage vector
         Vbus = np.zeros([1 + 2 * globals.no_sections,1], dtype=complex)
@@ -227,6 +231,7 @@ class results_ui(QtGui.QVBoxLayout):
         
         #print pipe_distance
         #print Vp_final
+        #print V_p
         
 
     def refresh_data(self):

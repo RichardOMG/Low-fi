@@ -207,16 +207,38 @@ class Window(QtGui.QWidget):
         QtGui.QMessageBox.about(self, "About Low-Fi",
                 """<b>Low-Fi</b> is a low-frequency induction (LFI) simulator that is intended to calculate induced voltages on pipelines sharing a joint right-of-way with overhead powerlines.
                    <p>
-                   This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
-                   <p>
-                   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public License</a> for more details. 
-                   <p>
                    Version: <b>v0.1 Beta<b><P>
                    <p>
                    Website: <a href="http://www.sigmapower.com.au/low-fi.html">www.sigmapower.com.au/low-fi.html</a>
                    <p> </p>
                    <p><img src="images/Sigma_Power.png"></p>
                    <p>&copy; 2014 Sigma Power Engineering Pty Ltd</p>
+                   <p>All rights reserved.</p>
+                   <p>
+                   Redistribution and use in binary form is permitted provided that the following conditions are met:
+                   <p>
+                    1. Redistributions in binary form must reproduce the above copyright
+                       notice, this list of conditions and the following disclaimer in the
+                       documentation and/or other materials provided with the distribution.
+                   <p>
+                    2. All advertising materials mentioning features or use of this software
+                       must display the following acknowledgement:
+                       This product includes software developed by the Sigma Power Engineering Pty Ltd.
+                   <p>
+                    3. Neither the name of the Sigma Power Engineering Pty Ltd nor the
+                       names of its contributors may be used to endorse or promote products
+                       derived from this software without specific prior written permission.
+                   <p>
+                    THIS SOFTWARE IS PROVIDED BY SIGMA POWER ENGINEERING PTY LTD ''AS IS'' AND ANY
+                    EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+                    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                    DISCLAIMED. IN NO EVENT SHALL SIGMA POWER ENGINEERING PTY LTD BE LIABLE FOR ANY
+                    DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+                    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+                    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+                    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+                    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+                    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.   
                    """)
     
 def main():
