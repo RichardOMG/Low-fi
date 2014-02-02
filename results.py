@@ -50,22 +50,31 @@ class results_ui(QtGui.QVBoxLayout):
         self.addLayout(vbox)
         calc_button.clicked.connect(self.calculate)
         
-        # Scrolling groupbox
-        groupbox = QtGui.QGroupBox()
-        groupbox.setTitle("Calculation Results")
-        scrollarea = QtGui.QScrollArea()
-        scrollarea.setWidget(groupbox)               
-        scrollarea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scrollarea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        scrollarea.setWidgetResizable(True)
-        scrollarea.setFixedHeight(500)      
-        self.results_layout = QtGui.QVBoxLayout()
-        self.results_layout.setAlignment(Qt.AlignTop)       
-        groupbox.setLayout(self.results_layout)  
+        # Scrolling groupbox - commented out, might remove this in favour of not showing individual calc steps
+        # Note: this won't actually do anything until widgets are in the layout as 
+        # QTableWidgets appear to have their own scroll behaviour
+        #groupbox = QtGui.QGroupBox()
+        #groupbox.setTitle("Calculation Results")
+        #self.scrollarea = QtGui.QScrollArea()
+        #self.scrollarea.setWidget(groupbox)               
+        #self.scrollarea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        #self.scrollarea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        #self.scrollarea.setWidgetResizable(True)
+        #self.scrollarea.setFixedHeight(500)      
+        #self.results_layout = QtGui.QVBoxLayout()
+        #self.results_layout.setAlignment(Qt.AlignTop)       
+        #groupbox.setLayout(self.results_layout)  
+        #self.scrollarea.hide()       
+        #vbox.addWidget(self.scrollarea)
+
+        self.results_table = utility.LowFiTable(self.main_window, headings = ["Distance along pipeline (m)", "Pipeline-to-earth touch voltage (V)"], allowPaste = False, alternatingRowColors = True)                        
+        self.results_table.hide()
+        self.results_table.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
         
-        scrollarea.hide()
+        vbox.addWidget(self.results_table)                
         
-        vbox.addWidget(scrollarea)
+       
+       
         
     
     # Calculate load and fault LFI voltages on the pipeline
@@ -235,6 +244,11 @@ class results_ui(QtGui.QVBoxLayout):
         plt.grid(color = '0.75', linestyle='--', linewidth=1)
         plt.show()
         
+        # Populate table of results in calc
+        data = np.transpose(np.array([pipe_distance, Vp_final]))
+        self.results_table.fill_table(data, readOnly = True)
+        self.results_table.show()
+        
         ##############
         # Diagnostics
         ##############
@@ -246,7 +260,6 @@ class results_ui(QtGui.QVBoxLayout):
 
     def refresh_data(self):
         """Update text fields to match global variables."""
-        ##############
-        # TO DO - Remove this if we don't need it
-        ##############
+        # This is probably not needed.
+        pass
         

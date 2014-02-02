@@ -102,11 +102,6 @@ class rightofway_ui(QtGui.QVBoxLayout):
         self.tableWidget.setRowCount(globals.no_sections)
         self.le.setText(str(globals.no_sections))
         self.tableWidget.fill_table(globals.sections)
-        #for row in range(0, self.tableWidget.rowCount()):
-        #    for col in range(0,4):
-        #        item = QTableWidgetItem()
-        #        item.setText(str(globals.sections[row, col]))
-        #        self.tableWidget.setItem(row, col, item)
 
             
         
