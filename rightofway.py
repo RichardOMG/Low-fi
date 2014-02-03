@@ -77,7 +77,7 @@ class rightofway_ui(QtGui.QVBoxLayout):
         elif tableWidgetItem.column() == 1:
             element = "separation"
             lower_bound = -1.0 * float("inf")
-            value = utility.validate(tableWidgetItem.text(), lower_bound, upper_bound, l_inclusive = True, u_inclusive = False)
+            value = utility.validate(tableWidgetItem.text(), lower_bound, upper_bound, l_inclusive = False, u_inclusive = False)
         elif tableWidgetItem.column() == 2:
             element = "earth impedance"
             lower_bound = -1.0 * float("inf")

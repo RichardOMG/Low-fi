@@ -31,7 +31,7 @@ def validate(input_value, lower_bound, upper_bound, l_inclusive = True, u_inclus
     try:
         value = float(input_value)
     except:
-        value = lower_bound - 1         
+        value = False
     if ((u_inclusive and value <= upper_bound) or (not u_inclusive and value < upper_bound)) and ((l_inclusive and value >= lower_bound) or (not l_inclusive and value > lower_bound)):
         return value
     return False

@@ -2,7 +2,7 @@
 """
 Low-fi: Low frequency induction simulation
 
-Results Tab
+Calculation method.  Called by results tab.
 
 Authors: Julius Susanto and Tom Walker
 Last edited: February 2014
