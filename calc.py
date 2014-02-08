@@ -22,7 +22,7 @@ def calculate(loadLFI):
         
         # Pipeline longitudinal shunt admittance (in Ohm^-1/km) - from CIGRE WG 36.02 Appendix G
         # Applies only when coat_rho >> soil_rho
-        
+
         ################################################
         # TO DO - expanded formulation for general case 
         #         (see Appendix G of CIGRE WG 36.02)
@@ -146,17 +146,23 @@ def calculate(loadLFI):
             Ybus[2*(row+1) - 1, 2*(row+1) - 1] = Y_p[row,0]
             Ybus[2*(row+1), 2*(row+1) - 1] = -Y_p[row,0]
             Ybus[2*(row+1) - 1, 2*(row+1)] = -Y_p[row,0]
-        
+
         # Solve linear system
         Ymat = np.matrix(Ybus)
         Yinv = Ymat.getI()
         Vpipe = Yinv * Vbus
-        
+               
         # Get the final pipeline-to-earth touch voltage (absolute value, every second node)
         Vp_final = np.absolute(Vpipe[0:2*n+1:2])
         
         # Plot results
-        pipe_distance = np.concatenate(([0], np.cumsum(globals.sections[:,0])))
+        pipe_distance = np.concatenate(([0], np.cumsum(globals.sections[:,0])))                
+
+        diagnostics = [("omega", omega), ("mu_0", mu_0), ("Zi_re", Zi_re)]
+        diagnostics = diagnostics + [("Yi_re", Yi_re), ("Yi_im", Yi_im), ("Y_i", Y_i)]        
+        diagnostics = diagnostics + [("Y_p", Y_p), ("Y_e", Y_e), ("V_p", V_p)]                
+        diagnostics = diagnostics + [("I_a", I_a), ("I_b", I_b), ("I_c", I_c)]        
+        diagnostics = diagnostics + [("Ybus", Ybus), ("Ymat", Ymat), ("Yinv", Yinv), ("Vpipe", Vpipe), ("Vp_final", Vp_final), ("pipe_distance", pipe_distance)]        
+
         
-        return [ pipe_distance, Vp_final ]
-        
+        return [ pipe_distance, Vp_final, diagnostics ]
