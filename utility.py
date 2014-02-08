@@ -12,6 +12,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import numpy as np
+import csv
 
 def validate(input_value, lower_bound, upper_bound, l_inclusive = True, u_inclusive = True):
     """Check if value is within allowable range.
@@ -73,14 +74,34 @@ def create_validation_hook(gui, text_field, description, lower_bound, upper_boun
     return validation_hook
 
 
+def write_table_to_csv_file(file_name, lowfi_table):
+    """Write the data from a LowFiTable to a .csv file."""
+    try:
+        with open(file_name, mode='w') as fp:
+            csv_writer = csv.writer(fp, dialect=csv.excel, lineterminator='\n')
+            csv_writer.writerows(lowfi_table.get_headings_and_data_as_list())
+        return True
+    except:
+        return False
+
+def write_tables_to_csv_file(folder_name, variables, lowfi_tables):
+    """Write the data from multiple LowFiTable to a .csv file. Each widget is given a separate tab."""
+    try:
+        if len(variables) == len(lowfi_tables):
+            for i in range(len(variables)):
+                if not write_table_to_csv_file(folder_name + '\\' + variables[i] + ".csv", lowfi_tables[i]):                    
+                    return False
+        return True
+    except:
+        return False
 
 class LowFiTable(QtGui.QTableWidget): 
     """Overloaded version of the QTableWidget which adds Copy/Paste functionality to the table."""
 
-    def __init__(self, main_window, data = [], headings = [], allowCopy = True, allowPaste = True, readOnly = False, alternatingRowColors = False):
+    def __init__(self, main_window, data = [], headings = [], allowCopy = True, allowPaste = True, readOnly = False, alternatingRowColors = False, allowShortcut = True):
         """Constructor which will set up Copy & Paste actions and populate table headings and data."""
         super(QtGui.QTableWidget, self).__init__()                
-        self.setup(main_window, allowCopy, allowPaste)
+        self.setup(main_window, allowCopy, allowPaste, allowShortcut)
         if len(data) > 0:
             self.fill_table(data, readOnly)
         if len(headings) > 0:
@@ -88,20 +109,22 @@ class LowFiTable(QtGui.QTableWidget):
             self.setHorizontalHeaderLabels(headings)
         self.setAlternatingRowColors(alternatingRowColors)
     
-    def setup(self, main_window, allowCopy = True, allowPaste = True):
+    def setup(self, main_window, allowCopy = True, allowPaste = True, allowShortcut = True):
         """Set up table."""
         self.main_window = main_window
         
         if allowCopy:
             copyAction = QtGui.QAction('&Copy', self)
-            copyAction.setShortcut('Ctrl+C')
+            if allowShortcut:
+                copyAction.setShortcut('Ctrl+C')
             copyAction.setStatusTip('Copy')
             copyAction.triggered.connect(self.copy_fn)        
             self.addAction(copyAction)            
 
         if allowPaste:                
             pasteAction = QtGui.QAction('&Paste', self)
-            pasteAction.setShortcut('Ctrl+V')
+            if allowShortcut:
+                pasteAction.setShortcut('Ctrl+V')
             pasteAction.setStatusTip('Paste')
             pasteAction.triggered.connect(self.paste_fn)       
             self.addAction(pasteAction)
@@ -129,7 +152,6 @@ class LowFiTable(QtGui.QTableWidget):
         copy = [char for pair in zip(data, delimiters) for char in pair]
         copy = ''.join(copy)
         QApplication.clipboard().setText(copy)
-        pass
 
     def paste_fn(self):
         """Function for the Paste action."""
@@ -154,10 +176,12 @@ class LowFiTable(QtGui.QTableWidget):
                             self.item(r + active_row, c + active_column).setText(str(data[r][c]))                                
         except:
             self.main_window.show_status_message("Clipboard data invalid.", error = True, beep = True)    
-    
-    def fill_table(self, data, readOnly = False):
+        
+    def fill_table(self, data, readOnly = False, convertComplexNumbers = False):
         """Fill table from 2D list or numpy array."""
         if len(data) > 0:
+            if isinstance(data, np.ndarray):
+                data = data.tolist()
             data_rows = len(data)
             data_columns = len(data[0])
             if data_columns > 0:
@@ -166,7 +190,42 @@ class LowFiTable(QtGui.QTableWidget):
                 for r in range(0, data_rows):
                     for c in range(0, data_columns):
                         item = QTableWidgetItem()
-                        item.setText(str(data[r][c]))
+                        # Convert complex numbers from 0j to 0 and (1+1j) to 1+1j
+                        if convertComplexNumbers and isinstance(data[r][c], np.complex):
+                            re = data[r][c].real
+                            im = data[r][c].imag
+                            result = []
+                            if re != 0:
+                                result = result + [str(re)]
+                            if im != 0:
+                                result = result + [str(abs(im)) + "j"]
+                            if len(result) == 0:
+                                result = ["0"]
+                            if im > 0:
+                                result = "+".join(result)
+                            else:
+                                result = "-".join(result)
+                            item.setText(result)
+                        else:                             
+                            item.setText(str(data[r][c]))
                         if readOnly:
                             item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-                        self.setItem(r, c, item)                        
+                        self.setItem(r, c, item)
+    
+    def get_headings_and_data_as_list(self):
+        """Return a 2D list including headings and data."""
+        data = self.get_data_as_list()
+        if self.horizontalHeaderItem(0) is None:
+            return data
+        headings = self.get_headings_as_list()        
+        return [headings] + data
+        
+    def get_headings_as_list(self):
+        """Return list of headings."""
+        headings = [ self.horizontalHeaderItem(c).text() for c in range(self.columnCount()) ]
+        return headings
+    
+    def get_data_as_list(self):
+        """Return the data from the table as a 2D list."""
+        data = [ [ self.item(r, c).text() for c in range(self.columnCount()) ] for r in range(self.rowCount()) ]
+        return data

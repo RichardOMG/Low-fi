@@ -7,7 +7,7 @@ Low-fi: Low frequency induction simulation
 Main window
 
 Authors: Julius Susanto and Tom Walker
-Last edited: November 2013
+Last edited: February 2014
 """
 
 import os, sys
@@ -18,6 +18,7 @@ from towergeo import *
 from pipeline import *
 from network import *
 from results import *
+from diagnostics import *
 import globals
 
 class Window(QtGui.QWidget):
@@ -102,6 +103,8 @@ class Window(QtGui.QWidget):
         tab3 = QtGui.QWidget()
         tab4 = QtGui.QWidget()
         tab5 = QtGui.QWidget()
+        tab6 = QtGui.QWidget()
+        self.tab_widget = tab_widget
                
         tab_widget.addTab(tab1, "Right of Way")
         tab_widget.addTab(tab2, "Tower") 
@@ -114,7 +117,7 @@ class Window(QtGui.QWidget):
         page3 = pipeline_ui(tab3)
         page4 = network_ui(tab4)
         page5 = results_ui(tab5)
-        self.pages = [page1, page2, page3, page4, page5]
+        self.pages = [page1, page2, page3, page4]
         
         page1.setup(self)
         page2.setup(self)
@@ -122,6 +125,11 @@ class Window(QtGui.QWidget):
         page4.setup(self)
         page5.setup(self)
         
+        # A tab for display matrices as tables for diagnostic purposes
+        self.diagnostics = diagnostics_ui(tab6)
+        self.diagnostics_tab = tab6
+        self.diagnostics.setup(self)
+               
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(menu_bar)
         vbox.addWidget(tab_widget) 
@@ -155,6 +163,18 @@ class Window(QtGui.QWidget):
         if beep:
             QApplication.beep()
         self.status_message.showMessage(message)
+
+    def diagnostics_clear(self):
+        """Clear the diagnostics tab."""
+        if self.tab_widget.indexOf(self.diagnostics_tab) > -1:
+            self.tab_widget.removeTab(self.tab_widget.indexOf(self.diagnostics_tab))
+        self.diagnostics.clear()
+
+    def diagnostics_matrix(self, title = "", data = [[]]):
+        """Make a table in the diagnostics tab filled with matrix data."""
+        if self.tab_widget.indexOf(self.diagnostics_tab) == -1:
+            self.tab_widget.addTab(self.diagnostics_tab, "Diagnostics")
+        self.diagnostics.log(title = title, data = data)
 
     def save_as_fn(self):
         """Function for the Save As action."""
