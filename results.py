@@ -78,28 +78,36 @@ class results_ui(QtGui.QVBoxLayout):
         for (title, data) in diagnostics:
             self.main_window.diagnostics_matrix(title = title, data = data)
         
-        # Plot results        
-        plt.plot(pipe_distance, Vp_final)
-        plt.xlim([0, pipe_distance[globals.no_sections]])
-        plt.xlabel("Distance along pipeline (m)")
-        
-        if self.combo.currentText() == "Load LFI":
-            plt.ylabel("Pipeline-to-earth touch voltage (V)")
-            plt.title("Load LFI Voltages")
-        else:
-            plt.ylabel("Pipeline-to-earth touch voltage (kV)")
-            plt.title("Fault LFI Voltages")
-        
-        plt.grid(color = '0.75', linestyle='--', linewidth=1)
-        plt.show()
-        
         # Populate table of results in calc
-        data = np.transpose(np.array([pipe_distance, Vp_final]))
+        if self.combo.currentText() == "Load LFI":
+            data = np.transpose(np.array([pipe_distance, Vp_final]))
+        else:
+            # Convert kV to V for fault LFI cases
+            data = np.transpose(np.array([pipe_distance, Vp_final * 1000]))
         self.results_table.fill_table(data, readOnly = True)
         self.results_table.show()
         
         # Unhide export button
-        self.export_button.show()        
+        self.export_button.show()   
+        
+        # Plot results        
+        if plt.fignum_exists(1):
+            # Show warning and do not plot
+            QtGui.QMessageBox.warning(self.main_window, 'Warning', "A plot is already open. Please close it to create a new plot.", QtGui.QMessageBox.Ok)
+        else:
+            plt.plot(pipe_distance, Vp_final)
+            plt.xlim([0, pipe_distance[globals.no_sections]])
+            plt.xlabel("Distance along pipeline (m)")
+            
+            if self.combo.currentText() == "Load LFI":
+                plt.ylabel("Pipeline-to-earth touch voltage (V)")
+                plt.title("Load LFI Voltages")
+            else:
+                plt.ylabel("Pipeline-to-earth touch voltage (kV)")
+                plt.title("Fault LFI Voltages")
+            
+            plt.grid(color = '0.75', linestyle='--', linewidth=1)
+            plt.show()
         
         ##############
         # Diagnostics
