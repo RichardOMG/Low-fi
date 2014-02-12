@@ -88,12 +88,14 @@ def calculate(loadLFI):
                         
             # Equivalent distance for all three lines
             D_lp = (D_ap * D_bp * D_cp) ** (0.3333333333)
+            D_lw = (D_aw * D_bw * D_cw) ** (0.3333333333)
             
             # Self impedance of earth wire
             Z_w = globals.tower_data["Z_w"]
             
             # Mutual impedances between pipeline and line conductors
             Z_lp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_lp))
+            Z_lw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_lw))
             Z_ap = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_ap))
             Z_bp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_bp))
             Z_cp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_cp))
@@ -108,6 +110,7 @@ def calculate(loadLFI):
             Z_apw = Z_ap - Z_aw * Z_wp / Z_w
             Z_bpw = Z_bp - Z_bw * Z_wp / Z_w
             Z_cpw = Z_cp - Z_cw * Z_wp / Z_w
+            Z_lpw = Z_lp - Z_lw * Z_wp / Z_w
             
             if globals.sections[row,1] < 0:
                 # Non parallel section = no induced voltage
@@ -118,7 +121,7 @@ def calculate(loadLFI):
                     V_p[row,0] = (Z_apw * I_a + Z_bpw * I_b + Z_cpw * I_c) * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000
                 else:
                     # Fault LFI (in kV)
-                    V_p[row,0] = Z_lp * globals.network_data["fault_current"] * globals.network_data["split_factor"] * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000        
+                    V_p[row,0] = Z_lpw * globals.network_data["fault_current"] * globals.network_data["split_factor"] * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000        
         
         # LFI voltage vector
         Vbus = np.zeros([1 + 2 * globals.no_sections,1], dtype=complex)
