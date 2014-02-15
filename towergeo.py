@@ -143,11 +143,11 @@ class towergeo_ui(QtGui.QVBoxLayout):
                 
         self.le1.editingFinished.connect(utility.create_validation_hook(self, self.le1, "L_ab", 0, float("inf")))
         self.le2.editingFinished.connect(utility.create_validation_hook(self, self.le2, "L_ac", 0, float("inf")))
-        self.le3.editingFinished.connect(utility.create_validation_hook(self, self.le3, "L_aw", 0, float("inf")))
+        self.le3.editingFinished.connect(utility.create_validation_hook(self, self.le3, "L_aw", -1 * float("inf"), float("inf")))
         self.le4.editingFinished.connect(utility.create_validation_hook(self, self.le4, "H_a", 0, float("inf")))
         self.le5.editingFinished.connect(utility.create_validation_hook(self, self.le5, "H_b", 0, float("inf")))
         self.le6.editingFinished.connect(utility.create_validation_hook(self, self.le6, "H_c", 0, float("inf")))
-        self.le7.editingFinished.connect(utility.create_validation_hook(self, self.le7, "H_w", 0, float("inf")))
+        self.le7.editingFinished.connect(utility.create_validation_hook(self, self.le7, "H_w", -1 * float("inf"), float("inf")))
         self.le8a.editingFinished.connect(utility.create_validation_hook(self, self.le8a, "Z_w (real component)", 0, float("inf")))
         self.le8b.editingFinished.connect(utility.create_validation_hook(self, self.le8b, "Z_w (real component)", 0, float("inf")))
 

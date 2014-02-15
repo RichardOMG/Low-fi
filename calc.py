@@ -123,10 +123,20 @@ def calculate(loadLFI):
             else:           
                 if loadLFI:
                     # Load LFI (in V)
-                    V_p[row,0] = (Z_apw * I_at + Z_bpw * I_bt + Z_cpw * I_ct) * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000
+                    if (globals.tower_data["L_aw"] >= 0) or (globals.tower_data["H_w"] >= 0):
+                        # With earth wire
+                        V_p[row,0] = (Z_apw * I_at + Z_bpw * I_bt + Z_cpw * I_ct) * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000
+                    else:
+                        # No earth wire
+                        V_p[row,0] = (Z_ap * I_at + Z_bp * I_bt + Z_cp * I_ct) * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000
                 else:
                     # Fault LFI (in kV)
-                    V_p[row,0] = Z_lpw * globals.network_data["fault_current"] * globals.network_data["split_factor"] * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000        
+                    if (globals.tower_data["L_aw"] >= 0) or (globals.tower_data["H_w"] >= 0):
+                        # With earth wire
+                        V_p[row,0] = Z_lpw * globals.network_data["fault_current"] * globals.network_data["split_factor"] * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000      
+                    else: 
+                        # No earth wire
+                        V_p[row,0] = Z_lp * globals.network_data["fault_current"] * globals.network_data["split_factor"] * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000 
         
         # LFI voltage vector
         Vbus = np.zeros([1 + 2 * globals.no_sections,1], dtype=complex)
