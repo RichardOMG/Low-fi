@@ -283,7 +283,7 @@ The preceding analysis for a two section pipeline can be extended to an arbitrar
 \newpage
 \section{Using the Program}
 \subsection{Right of Way Tab}
-The Right of Way tab describes the plan layout of the overhead line in relation to the pipeline. It also allows the user to specify the points on the pipeline that are intentionally earthed and the soil resistivity of each pipeline section. 
+The Right of Way tab describes the plan layout of the overhead line in relation to the pipeline. It also allows the user to specify the points on the pipeline that are intentionally earthed, the soil resistivity of each pipeline section and the phase rotation of the overhead line conductors (i.e. to allow for transpositions). 
 
 \begin{figure}[!htp]
 \begin{center}
@@ -299,6 +299,7 @@ The Right of Way tab describes the plan layout of the overhead line in relation 
 \item For the final section (where there is no next section) or where the next section is non-parallel, the separation distance is assumed to be constant for the entire sectional length
 \item A separation distance $<$0 indicates that the pipeline is not parallel to the overhead line
 \item An earthing impedance $<$0 indicates that the start of the pipeline section is not intentionally earthed
+\item The phasing field indicates the phase rotation of the overhead line conductors to allow the modelling of line transpositions. Each field should be set as an integer number from 0 to 2, where 0 indicates no phase rotation, 1 indicates a 120 degree phase rotation and 2 indicates a 240 degree phase rotation. 
 \end{itemize}
 
 \subsection{Tower Tab}
@@ -315,13 +316,15 @@ The Tower tab describes the geometry of the overhead line tower with respect to 
 \begin{itemize}
 \item $L_{ab}$ is the horizontal distance between phase conductors 'a' and 'b' (m)
 \item $L_{ac}$ is the horizontal distance between phase conductors 'a' and 'c' (m)
-\item $L_{aw}$ is the horizontal distance between phase conductor 'a' and the earth wire (m)
+\item $L_{aw}$ is the horizontal distance between phase conductor 'a' and the earth wire (m) - Note 1
 \item $H_a$ is the height of phase conductor 'a' from the pipeline (m)
 \item $H_b$ is the height of phase conductor 'b' from the pipeline (m)
 \item $H_c$ is the height of phase conductor 'c' from the pipeline (m)
-\item $H_w$ is the height of the earth wire from the pipeline (m)
+\item $H_w$ is the height of the earth wire from the pipeline (m) - Note 1
 \item $Z_w$ is the series self impedance of the earth wire ($\Omega$/km)
 \end{itemize}
+
+Note 1: to model overhead lines without earth wires, set either of the earth wire parameters $L_{aw}$ or $H_w$ to a negative number.
 
 \subsection{Pipeline Tab}
 The Pipeline Tab allows the user to input the pipeline and coating material characteristics, which will be used to compute the series impedance and shunt admittance of the pipeline (refer to section \ref{sec:pipeline_impedance} for more details).
@@ -360,7 +363,6 @@ The Network tab describes the relevant power system characteristics of the overh
 \item Load current describes the normal operating load currents per phase flowing through the overhead line (A)
 \item Maximum earth fault current is the maximum short circuit current magnitude that is expected from an earth fault where the fault current flows along the entire joint right of way (kA)
 \item Earth fault split factor is the proportion of current that returns through the earth (pu). The rest of the fault current is assumed to return through the overhead earth wires.
-
 \end{itemize}
 
 \subsection{Results Tab}
