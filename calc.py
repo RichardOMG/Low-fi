@@ -112,13 +112,18 @@ def calculate(loadLFI):
             Z_cpw = Z_cp - Z_cw * Z_wp / Z_w
             Z_lpw = Z_lp - Z_lw * Z_wp / Z_w
             
+            # Adjust currents for line transpositions
+            I_at = I_a * np.exp(complex(0, 2 * np.pi / 3 * int(globals.sections[row,4])))
+            I_bt = I_b * np.exp(complex(0, 2 * np.pi / 3 * int(globals.sections[row,4])))
+            I_ct = I_c * np.exp(complex(0, 2 * np.pi / 3 * int(globals.sections[row,4])))
+            
             if globals.sections[row,1] < 0:
                 # Non parallel section = no induced voltage
                 V_p[row,0] = 0
             else:           
                 if loadLFI:
                     # Load LFI (in V)
-                    V_p[row,0] = (Z_apw * I_a + Z_bpw * I_b + Z_cpw * I_c) * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000
+                    V_p[row,0] = (Z_apw * I_at + Z_bpw * I_bt + Z_cpw * I_ct) * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000
                 else:
                     # Fault LFI (in kV)
                     V_p[row,0] = Z_lpw * globals.network_data["fault_current"] * globals.network_data["split_factor"] * globals.network_data["shield_factor"] * globals.sections[row,0] / 1000        
