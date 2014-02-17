@@ -19,6 +19,7 @@ from pipeline import *
 from network import *
 from results import *
 from diagnostics import *
+from mapping import *
 import globals
 
 class Window(QtGui.QWidget):
@@ -104,6 +105,7 @@ class Window(QtGui.QWidget):
         tab4 = QtGui.QWidget()
         tab5 = QtGui.QWidget()
         tab6 = QtGui.QWidget()
+        tab7 = QtGui.QWidget()
         self.tab_widget = tab_widget
                
         tab_widget.addTab(tab1, "Right of Way")
@@ -111,23 +113,30 @@ class Window(QtGui.QWidget):
         tab_widget.addTab(tab3, "Pipeline") 
         tab_widget.addTab(tab4, "Network") 
         tab_widget.addTab(tab5, "Results") 
+        tab_widget.addTab(tab6, "Map") 
         
         page1 = rightofway_ui(tab1)
         page2 = towergeo_ui(tab2)
         page3 = pipeline_ui(tab3)
         page4 = network_ui(tab4)
         page5 = results_ui(tab5)
+        page6 = mapping_ui(tab6)
+        self.mapping = page6    
+        
         self.pages = [page1, page2, page3, page4]
         
+        page6.setup(self)
         page1.setup(self)
         page2.setup(self)
         page3.setup(self)
         page4.setup(self)
         page5.setup(self)
         
+        
+        
         # A tab for display matrices as tables for diagnostic purposes
-        self.diagnostics = diagnostics_ui(tab6)
-        self.diagnostics_tab = tab6
+        self.diagnostics = diagnostics_ui(tab7)
+        self.diagnostics_tab = tab7
         self.diagnostics.setup(self)
                
         vbox = QtGui.QVBoxLayout()
@@ -135,7 +144,7 @@ class Window(QtGui.QWidget):
         vbox.addWidget(tab_widget) 
         vbox.addWidget(self.status_message)        
         
-        self.setLayout(vbox)
+        self.setLayout(vbox)       
         
         #self.statusBar().showMessage('Ready')
         
@@ -151,6 +160,10 @@ class Window(QtGui.QWidget):
         for p in self.pages:
             p.refresh_data()
             
+    def refresh_mapping(self):
+        """Update mapping window based on global variables."""
+        self.mapping.refresh_scene()
+    
     def show_status_message(self, message, error = False, beep = False):
         """Display a status message on the status line.
            If error is True the status text will be coloured red.
@@ -260,6 +273,10 @@ class Window(QtGui.QWidget):
                     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
                     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.   
                    """)
+    
+    # triggered on window resize    
+    def resizeEvent(self, event):
+        self.refresh_mapping()
     
 def main():
     
