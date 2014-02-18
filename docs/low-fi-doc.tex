@@ -198,7 +198,15 @@ It is important to note that this formulation is only accurate for short separat
 d_{lp} \leq 90 \sqrt{\frac{\rho}{f}}
 \end{equation}
 
-At a nominal frequency of 50Hz, this is equivalent to maximum separations of 40m, 127m and 402m for 10$\Omega$.m, 100$\Omega$.m and 1000$\Omega$.m earth resistivities.
+At a nominal frequency of 50Hz, this is equivalent to maximum separations of 40m, 127m and 402m for 10$\Omega$.m, 100$\Omega$.m and 1000$\Omega$.m earth resistivities. The reason for this restriction is obvious from Figure \ref{fig:mutual_impedance}, which clearly shows that at high separation distances, the mutual impedance begins to increase rather than decrease as would be expected.
+
+\begin{figure}
+\begin{center}
+\caption{Validity of simplified Carson-Clem mutual impedance formulation}
+\label{fig:mutual_impedance}
+\includegraphics[width=\linewidth]{./Figures/mutual_impedance.png}
+\end{center}
+\end{figure}
 
 \subsection{Induced Voltages in Pipeline}
 The induced voltage on a section of the pipeline from a loaded conductor is calculated as follows:
