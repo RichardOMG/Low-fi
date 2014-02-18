@@ -14,7 +14,7 @@ from PyQt4.QtGui import *
 import numpy as np
 import csv
 
-def validate(input_value, lower_bound, upper_bound, l_inclusive = True, u_inclusive = True):
+def validate(input_value, lower_bound, upper_bound, l_inclusive = True, u_inclusive = True, convert_to_integer = False):
     """Check if value is within allowable range.
     
     :param input_value: Input value to validate
@@ -28,16 +28,41 @@ def validate(input_value, lower_bound, upper_bound, l_inclusive = True, u_inclus
     :param u_inclusive: True if range includes upper bound.
     :type u_inclusive: Boolean
     :returns: Float of value if acceptable, False otherwise.
+    :param conver_to_integer: Convert input_value to integer prior to check for validity.
+    :type convert_to_integer: Boolean
     """    
     try:
         value = float(input_value)
+        if convert_to_integer:
+            value = int(value)
     except:
         value = False
     if ((u_inclusive and value <= upper_bound) or (not u_inclusive and value < upper_bound)) and ((l_inclusive and value >= lower_bound) or (not l_inclusive and value > lower_bound)):
         return value
     return False
 
-def create_validation_hook(gui, text_field, description, lower_bound, upper_bound, l_inclusive = True, u_inclusive = True, update_data = True, refresh_data = True):
+def validate_from_list(input_value, valid_list, convert_to_numbers = False, convert_to_integer = False):
+    """Check if a value is within list of valid numbers.
+
+    :param input_value: Input value to validate
+    :type input_value: String
+    :param valid_list: List of acceptable values.
+    :type valid_list: List
+    :param convert_to_numbers: Convert input_value to number prior to checking for presence in list.
+    :type convert_to_numbers: Boolean
+    :param conver_to_integer: Convert input_value to integer prior to checking for presence in list.
+    :type convert_to_integer: Boolean
+    """
+    try:
+        if convert_to_numbers:
+            value = float(input_value)        
+            if convert_to_integer:
+                value = int(value)
+    except:
+        value = False
+    return value in valid_list
+
+def create_validation_hook(gui, text_field, description, lower_bound = 0.0, upper_bound = 1.0, l_inclusive = True, u_inclusive = True, update_data = True, refresh_data = True, convert_to_integer = False, select_list = None, select_numeric = False, ):
     """Wrapper to create a function which will validate value input into a QLineEdit. For floating point numbers.
 
     :param gui: Reference to main window
@@ -46,22 +71,32 @@ def create_validation_hook(gui, text_field, description, lower_bound, upper_boun
     :type text_field: QLineEdit
     :param description: Description of text field for display in status line.
     :type description: String
-    :param lower_bound: Lowest acceptable value.
+    :param select_list: Optional. Limits acceptable values to a list.
+    :type select_list: List
+    :param select_numeric: Optional. True if select list values should be converted to numbers before comparison to list.
+    :type select_numeric: Boolean
+    :param lower_bound: Optional. Lowest acceptable value.
     :type lower_bound: Float
-    :param upper_bound: Highest acceptable value.
+    :param upper_bound: Optional. Highest acceptable value.
     :type upper_bound: Float
     :param l_inclusive: Optional. True if range includes lower bound.
     :type l_inclusive: Boolean
     :param u_inclusive: Optional. True if range includes upper bound.
     :type u_inclusive: Boolean
+    :param convert_to_integer: Optional. True if value should be converted to integer.
+    :type convert_to_integer: Boolean
     :param update_data: Optional. True if update_data function should be called on gui object.
     :type update_data: Boolean
     :param refresh_data: Optional. True if refresh_data function should be called on gui object.
     :type refresh_data: Boolean
     :returns: Reference to function which will perform validation calls.
     """        
+    if select_list is None:
+        test = lambda text: validate(text, lower_bound, upper_bound, l_inclusive, u_inclusive, convert_to_integer = convert_to_integer)
+    else:
+        test = lambda text: validate_from_list(text, select_list, select_numeric, convert_to_integer)
     def validation_hook():
-        if validate(text_field.text(), lower_bound, upper_bound, l_inclusive, u_inclusive) is False:
+        if test(text_field.text()) is False:
             gui.main_window.show_status_message(description + ": Input value '" + text_field.text() + "' out of bounds (" + str(lower_bound) + " to " + str(upper_bound) + "). Value not set.", error = True, beep = True)
             if refresh_data:
                 gui.refresh_data()

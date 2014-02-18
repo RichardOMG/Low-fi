@@ -65,7 +65,8 @@ class rightofway_ui(QtGui.QVBoxLayout):
         
     
     def update_data(self):
-        globals.no_sections = int(self.le.text())
+        globals.no_sections = int(float(self.le.text()))
+        self.le.setText(str(globals.no_sections))
     
     # Update sections matrix whenever table data is changed
     def update_data_matrix(self, tableWidgetItem): 
@@ -91,11 +92,17 @@ class rightofway_ui(QtGui.QVBoxLayout):
             lower_bound = 0
             upper_bound = 2
             value = utility.validate(tableWidgetItem.text(), lower_bound, upper_bound, l_inclusive = True, u_inclusive = True)
+            if not value is False:
+                value = int(value)
         if not value is False:        
-            globals.sections[tableWidgetItem.row(), tableWidgetItem.column()] = float(tableWidgetItem.text())            
+            update_mapping = (globals.sections[tableWidgetItem.row(), tableWidgetItem.column()] != value)
+            globals.sections[tableWidgetItem.row(), tableWidgetItem.column()] = value#float(tableWidgetItem.text())            
+            tableWidgetItem.setText(str(value))
+            if update_mapping:
+                self.main_window.refresh_mapping()
         else:
             self.main_window.show_status_message("Section " + str(tableWidgetItem.row() + 1) + " " + element +  ": Input value '" + tableWidgetItem.text() + "' out of bounds. (" + str(lower_bound) + " to " + str(upper_bound) + "). Value not set.", error = True, beep = True)
-            self.refresh_data()
+            self.refresh_data()            
         ##############
         # TODO - Apply dynamic criteria to separation distance (based on soli resistivity)
         ##############
