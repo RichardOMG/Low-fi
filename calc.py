@@ -86,7 +86,7 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
                 # For the moment depth of burial is set to 1m..            
                 h2 = 1
 
-                # Equivalent distances for faulted condition                
+                # Equivalent distances for conductors            
                 H_aw = np.abs(globals.tower_data["H_w"] - globals.tower_data["H_a"])
                 H_bw = np.abs(globals.tower_data["H_w"] - globals.tower_data["H_b"])
                 H_cw = np.abs(globals.tower_data["H_w"] - globals.tower_data["H_c"])                
@@ -101,15 +101,15 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
                 
                 # Mutual impedances between pipeline and line conductors                
                 Z_lp = armetani_approximation(omega, mu_0, rho_e, H_lp - h2, h2, L_lp)
-                Z_lw = armetani_approximation(omega, mu_0, rho_e, H_lw, 0, L_lw)
+                Z_lw = complex(0.0, 2.8935e-3 * globals.network_data["freq"] * np.log10(1 / np.sqrt(H_lw ** 2 + L_lw ** 2)))
                 Z_ap = armetani_approximation(omega, mu_0, rho_e, globals.tower_data["H_a"] - h2, h2, L_a)
                 Z_bp = armetani_approximation(omega, mu_0, rho_e, globals.tower_data["H_b"] - h2, h2, L_b)
                 Z_cp = armetani_approximation(omega, mu_0, rho_e, globals.tower_data["H_c"] - h2, h2, L_c)
                 
                 # Earthwire impedances
-                Z_aw = armetani_approximation(omega, mu_0, rho_e, H_aw, 0, L_aw)
-                Z_bw = armetani_approximation(omega, mu_0, rho_e, H_bw, 0, L_bw)
-                Z_cw = armetani_approximation(omega, mu_0, rho_e, H_cw, 0, L_cw)
+                Z_aw = complex(0.0, 2.8935e-3 * globals.network_data["freq"] * np.log10(1 / np.sqrt(H_aw ** 2 + L_aw ** 2)))                
+                Z_bw = complex(0.0, 2.8935e-3 * globals.network_data["freq"] * np.log10(1 / np.sqrt(H_bw ** 2 + L_bw ** 2)))                
+                Z_cw = complex(0.0, 2.8935e-3 * globals.network_data["freq"] * np.log10(1 / np.sqrt(H_cw ** 2 + L_cw ** 2)))                
                 Z_wp = armetani_approximation(omega, mu_0, rho_e, globals.tower_data["H_w"], 0, L_w)
             
             elif mutual_impedance_formula == 2:
@@ -137,15 +137,15 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
                 
                 # Mutual impedances between pipeline and line conductors            
                 Z_lp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_lp))
-                Z_lw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_lw))
+                Z_lw = complex(0.0, 2.8935e-3 * globals.network_data["freq"] * np.log10(1 / D_lw))
                 Z_ap = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_ap))
                 Z_bp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_bp))
                 Z_cp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_cp))
                 
                 # Earth wire mutual impedances
-                Z_aw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_aw))
-                Z_bw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_bw))
-                Z_cw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_cw))
+                Z_aw = complex(0.0, 2.8935e-3 * globals.network_data["freq"] * np.log10(1 / D_aw))                
+                Z_bw = complex(0.0, 2.8935e-3 * globals.network_data["freq"] * np.log10(1 / D_bw))
+                Z_cw = complex(0.0, 2.8935e-3 * globals.network_data["freq"] * np.log10(1 / D_cw))                
                 Z_wp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_wp))
 
             # Self impedance of earth wire
