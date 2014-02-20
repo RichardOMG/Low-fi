@@ -33,6 +33,14 @@ class results_ui(QtGui.QVBoxLayout):
         self.combo = QtGui.QComboBox()
         self.combo.addItem("Load LFI")
         self.combo.addItem("Fault LFI")
+
+        label2 = QtGui.QLabel('Select mutual impedance formula:')
+        label1.setFixedWidth(80)
+        
+        self.mutual_impedance_selection = QtGui.QComboBox()
+        self.mutual_impedance_selection.addItem("Carson-Clem (AS4853)")
+        self.mutual_impedance_selection.addItem("Armetani approximation")
+        self.mutual_impedance_selection.addItem("Lucca approximation")
         
         calc_button = QtGui.QPushButton("Calculate")
         calc_button.setFixedWidth(80)       
@@ -42,6 +50,8 @@ class results_ui(QtGui.QVBoxLayout):
         self.export_button.hide()        
         
         hbox = QtGui.QHBoxLayout()
+        hbox.addWidget(label2)
+        hbox.addWidget(self.mutual_impedance_selection)
         hbox.addWidget(label1)
         hbox.addWidget(self.combo)
         hbox.addWidget(calc_button)
@@ -71,7 +81,7 @@ class results_ui(QtGui.QVBoxLayout):
         loadLFI = self.combo.currentText() == "Load LFI"
        
         # launch calculation
-        [ pipe_distance, Vp_final, diagnostics ] = calc.calculate(loadLFI)
+        [ pipe_distance, Vp_final, diagnostics ] = calc.calculate(loadLFI, mutual_impedance_formula = self.mutual_impedance_selection.currentIndex())
                 
         # clear diagnostics log and refresh with matrices from latest calculation
         self.main_window.diagnostics_clear()

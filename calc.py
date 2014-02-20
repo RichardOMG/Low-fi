@@ -13,7 +13,9 @@ import numpy as np
 import dateutil, pyparsing
 import matplotlib.pyplot as plt
 
-def calculate(loadLFI):
+def calculate(loadLFI, mutual_impedance_formula = 0):
+        # Mutual impedance formulae detailed further on.
+
         # Pipeline longitudinal series impedance (in Ohm/km) - from CIGRE WG 36.02 Appendix G
         # Real part (is constant as it does not depend on soil resistivity)
         omega = 2 * np.pi * globals.network_data["freq"]
@@ -43,8 +45,6 @@ def calculate(loadLFI):
         I_c = complex(globals.network_data["current_c"] * np.cos(globals.network_data["angle_c"] * np.pi / 180), globals.network_data["current_c"] * np.sin(globals.network_data["angle_c"] * np.pi / 180))
         
         for row in range(0, globals.no_sections):
-            # Return current depth
-            D_e = 658.37 * (globals.sections[row,3] / globals.network_data["freq"]) ** 0.5
             
             # Pipeline longitudinal series impedance (in Ohm/km) - from CIGRE WG 36.02 Appendix G
             Zi_im = mu_0 * globals.network_data["freq"] * np.log((3.7/globals.pipe_data["diameter"]) * (globals.sections[row,3] / (mu_0 * omega)) ** 0.5)
@@ -71,41 +71,85 @@ def calculate(loadLFI):
                 L_b = globals.sections[row,1] + globals.tower_data["L_ab"]
                 L_c = globals.sections[row,1] + globals.tower_data["L_ac"]
                 L_w = globals.sections[row,1] + globals.tower_data["L_aw"]
-                
-            D_ap = (L_a ** 2 + globals.tower_data["H_a"] ** 2) ** 0.5
-            D_bp = (L_b ** 2 + globals.tower_data["H_b"] ** 2) ** 0.5
-            D_cp = (L_c ** 2 + globals.tower_data["H_c"] ** 2) ** 0.5
-            
+    
             #####################################################
             # TO DO - Earth wire shielding factor calculation
             #         for fault LFI
             #####################################################
             
-            D_aw = (globals.tower_data["L_aw"] ** 2 + (globals.tower_data["H_w"] - globals.tower_data["H_a"]) ** 2) ** 0.5
-            D_bw = ((globals.tower_data["L_aw"] - globals.tower_data["L_ab"]) ** 2 + (globals.tower_data["H_w"] - globals.tower_data["H_b"]) ** 2) ** 0.5
-            D_cw = ((globals.tower_data["L_aw"] - globals.tower_data["L_ac"]) ** 2 + (globals.tower_data["H_w"] - globals.tower_data["H_c"]) ** 2) ** 0.5
-            D_wp = (L_w ** 2 + globals.tower_data["H_w"] ** 2) ** 0.5
-                        
-            # Equivalent distance for all three lines
-            D_lp = (D_ap * D_bp * D_cp) ** (0.3333333333)
-            D_lw = (D_aw * D_bw * D_cw) ** (0.3333333333)
+            # Calculate mutual impedance of pipeline and aerial conductors
+            if mutual_impedance_formula == 1:
+                # Armetani mutual impedance approximation                                           
+                rho_e = globals.sections[row,3]
             
+                # For the moment depth of burial is set to 1m..            
+                h2 = 1
+
+                # Equivalent distances for faulted condition                
+                H_aw = np.abs(globals.tower_data["H_w"] - globals.tower_data["H_a"])
+                H_bw = np.abs(globals.tower_data["H_w"] - globals.tower_data["H_b"])
+                H_cw = np.abs(globals.tower_data["H_w"] - globals.tower_data["H_c"])                
+                H_lw = (H_aw * H_bw * H_cw) ** (0.3333333333)
+                H_lp = (globals.tower_data["H_a"] * globals.tower_data["H_b"] * globals.tower_data["H_c"]) ** (0.3333333333)
+
+                L_aw = globals.tower_data["L_aw"]
+                L_bw = globals.tower_data["L_ab"] - globals.tower_data["L_aw"]
+                L_cw = globals.tower_data["L_ac"] - globals.tower_data["L_aw"]
+                L_lw = (L_aw * L_bw * L_cw) ** (0.3333333333)
+                L_lp = (L_a * L_b * L_c) ** (0.3333333333)     
+                
+                # Mutual impedances between pipeline and line conductors                
+                Z_lp = armetani_approximation(omega, mu_0, rho_e, H_lp - h2, h2, L_lp)
+                Z_lw = armetani_approximation(omega, mu_0, rho_e, H_lw, 0, L_lw)
+                Z_ap = armetani_approximation(omega, mu_0, rho_e, globals.tower_data["H_a"] - h2, h2, L_a)
+                Z_bp = armetani_approximation(omega, mu_0, rho_e, globals.tower_data["H_b"] - h2, h2, L_b)
+                Z_cp = armetani_approximation(omega, mu_0, rho_e, globals.tower_data["H_c"] - h2, h2, L_c)
+                
+                # Earthwire impedances
+                Z_aw = armetani_approximation(omega, mu_0, rho_e, H_aw, 0, L_aw)
+                Z_bw = armetani_approximation(omega, mu_0, rho_e, H_bw, 0, L_bw)
+                Z_cw = armetani_approximation(omega, mu_0, rho_e, H_cw, 0, L_cw)
+                Z_wp = armetani_approximation(omega, mu_0, rho_e, globals.tower_data["H_w"], 0, L_w)
+            
+            elif mutual_impedance_formula == 2:
+                # Lucca mutual impedance approximation                        
+                pass
+                
+            else:
+                # AS4853 version of Carson-Clem mutual impedance approximation            
+            
+                # Return current depth
+                D_e = 658.37 * (globals.sections[row,3] / globals.network_data["freq"]) ** 0.5
+            
+                D_ap = (L_a ** 2 + globals.tower_data["H_a"] ** 2) ** 0.5
+                D_bp = (L_b ** 2 + globals.tower_data["H_b"] ** 2) ** 0.5
+                D_cp = (L_c ** 2 + globals.tower_data["H_c"] ** 2) ** 0.5            
+                
+                D_aw = (globals.tower_data["L_aw"] ** 2 + (globals.tower_data["H_w"] - globals.tower_data["H_a"]) ** 2) ** 0.5
+                D_bw = ((globals.tower_data["L_aw"] - globals.tower_data["L_ab"]) ** 2 + (globals.tower_data["H_w"] - globals.tower_data["H_b"]) ** 2) ** 0.5
+                D_cw = ((globals.tower_data["L_aw"] - globals.tower_data["L_ac"]) ** 2 + (globals.tower_data["H_w"] - globals.tower_data["H_c"]) ** 2) ** 0.5
+                D_wp = (L_w ** 2 + globals.tower_data["H_w"] ** 2) ** 0.5
+                            
+                # Equivalent distance for all three lines
+                D_lp = (D_ap * D_bp * D_cp) ** (0.3333333333)
+                D_lw = (D_aw * D_bw * D_cw) ** (0.3333333333)                
+                
+                # Mutual impedances between pipeline and line conductors            
+                Z_lp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_lp))
+                Z_lw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_lw))
+                Z_ap = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_ap))
+                Z_bp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_bp))
+                Z_cp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_cp))
+                
+                # Earth wire mutual impedances
+                Z_aw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_aw))
+                Z_bw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_bw))
+                Z_cw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_cw))
+                Z_wp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_wp))
+
             # Self impedance of earth wire
-            Z_w = globals.tower_data["Z_w"]
-            
-            # Mutual impedances between pipeline and line conductors
-            Z_lp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_lp))
-            Z_lw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_lw))
-            Z_ap = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_ap))
-            Z_bp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_bp))
-            Z_cp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_cp))
-            
-            # Earth wire mutual impedances
-            Z_aw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_aw))
-            Z_bw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_bw))
-            Z_cw = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_cw))
-            Z_wp = complex(9.869e-4 * globals.network_data["freq"], 2.8935e-3 * globals.network_data["freq"] * np.log10(D_e / D_wp))
-            
+            Z_w = globals.tower_data["Z_w"]                                       
+                       
             # Adjusted mutual impedance with influence of earth wire
             Z_apw = Z_ap - Z_aw * Z_wp / Z_w
             Z_bpw = Z_bp - Z_bw * Z_wp / Z_w
@@ -184,3 +228,44 @@ def calculate(loadLFI):
 
         
         return [ pipe_distance, Vp_final, diagnostics ]
+
+
+def armetani_approximation(omega, mu_0, rho, h1, h2, y):
+    """Calculates mutual impedance between overhead conductor and buried conductor using the Ametani mutual impedance approximation.
+    This function implements equation 27 of the paper which calculates Ohm/m.  This is converted to Ohm/km, hence the factor of 1000.
+    
+    A. Ametani, T. Yoneda, Y. Baba, N. Nagaoka, "An Investigation of Earth-Return Impedance Between Overhead and 
+    Underground Conductors and Its Approximation", IEEE Transactions on Electromagnetic Compatibility, vol 51, 
+    no. 3, pp860-867, Aug. 2009
+
+    :param omega: System frequency (rad/s)
+    :type omega: Float
+    :param mu_o: Free space permeability
+    :type mu_0: Float
+    :param rho: Earth resistivity of soil
+    :type rho: Float
+    :param h1: Height of overhead conductor above ground
+    :type h1: Float
+    :param h2: Depth of buried of underground conductor
+    :type h2: Float
+    :param y: Horizontal separation between conductors
+    :type y: Float
+    """
+    m = np.sqrt(1j * omega * mu_0 / rho)
+    he = 1 / m
+    H = h1 + h2 + 2 * he
+    S = np.sqrt(H ** 2 + y ** 2)
+    D = np.sqrt((h1 + h2) ** 2 + y ** 2)
+    Zm = 1000j * omega * (mu_0 / (2 * np.pi)) * np.exp(-h2 / he) * np.log10(S / D) / np.log10(np.exp(1))    
+    return Zm
+    
+def lucca_approximation():
+    """Calculates mutual impedance between overhead conductor and buried conductor using the Lucca mutual impedance approximation.
+    .....which equation????
+    
+    G. Lucca, "Mutual Impedance Between an Overhead and a Buried Line with Earth Return", in Proc. Int. Electr. Eng. 
+    9th Int. Conf. EMC, 1994, pp80-86
+
+  
+    """
+    pass
