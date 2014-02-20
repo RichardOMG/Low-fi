@@ -264,3 +264,4 @@ class LowFiTable(QtGui.QTableWidget):
         """Return the data from the table as a 2D list."""
         data = [ [ self.item(r, c).text() for c in range(self.columnCount()) ] for r in range(self.rowCount()) ]
         return data
+       

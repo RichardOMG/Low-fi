@@ -47,7 +47,7 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
         for row in range(0, globals.no_sections):
             
             # Pipeline longitudinal series impedance (in Ohm/km) - from CIGRE WG 36.02 Appendix G
-            Zi_im = mu_0 * globals.network_data["freq"] * np.log((3.7/globals.pipe_data["diameter"]) * (globals.sections[row,3] / (mu_0 * omega)) ** 0.5)
+            Zi_im = mu_0 * globals.network_data["freq"] * np.log((3.7/globals.pipe_data["diameter"]) * (globals.sections[row,4] / (mu_0 * omega)) ** 0.5)
             Z_i = complex(Zi_re * 1000, Zi_im * 1000)
         
             # Compute pipeline admittances
@@ -55,8 +55,9 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
             Y_p[row,1] = Y_i * globals.sections[row,0] / 1000
             
             # Compute earth admittances
+            earth_resistance = np.complex(globals.sections[row,2], globals.sections[row,3])
             if globals.sections[row,2] > 0:
-                Y_e[row] = 1 / globals.sections[row,2]
+                Y_e[row] = 1 / earth_resistance
             else:
                 Y_e[row] = 0
             
@@ -80,7 +81,7 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
             # Calculate mutual impedance of pipeline and aerial conductors
             if mutual_impedance_formula == 1:
                 # Armetani mutual impedance approximation                                           
-                rho_e = globals.sections[row,3]
+                rho_e = globals.sections[row,4]
             
                 # For the moment depth of burial is set to 1m..            
                 h2 = 1
@@ -119,7 +120,7 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
                 # AS4853 version of Carson-Clem mutual impedance approximation            
             
                 # Return current depth
-                D_e = 658.37 * (globals.sections[row,3] / globals.network_data["freq"]) ** 0.5
+                D_e = 658.37 * (globals.sections[row,4] / globals.network_data["freq"]) ** 0.5
             
                 D_ap = (L_a ** 2 + globals.tower_data["H_a"] ** 2) ** 0.5
                 D_bp = (L_b ** 2 + globals.tower_data["H_b"] ** 2) ** 0.5
@@ -157,9 +158,9 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
             Z_lpw = Z_lp - Z_lw * Z_wp / Z_w
             
             # Adjust currents for line transpositions
-            I_at = I_a * np.exp(complex(0, 2 * np.pi / 3 * int(globals.sections[row,4])))
-            I_bt = I_b * np.exp(complex(0, 2 * np.pi / 3 * int(globals.sections[row,4])))
-            I_ct = I_c * np.exp(complex(0, 2 * np.pi / 3 * int(globals.sections[row,4])))
+            I_at = I_a * np.exp(complex(0, 2 * np.pi / 3 * int(globals.sections[row,5])))
+            I_bt = I_b * np.exp(complex(0, 2 * np.pi / 3 * int(globals.sections[row,5])))
+            I_ct = I_c * np.exp(complex(0, 2 * np.pi / 3 * int(globals.sections[row,5])))
             
             if globals.sections[row,1] < 0:
                 # Non parallel section = no induced voltage
@@ -220,7 +221,7 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
         # Plot results
         pipe_distance = np.concatenate(([0], np.cumsum(globals.sections[:,0])))                
 
-        diagnostics = [("omega", omega), ("mu_0", mu_0), ("Zi_re", Zi_re)]
+        diagnostics = [("right of way", globals.sections), ("omega", omega), ("mu_0", mu_0), ("Zi_re", Zi_re)]        
         diagnostics = diagnostics + [("Yi_re", Yi_re), ("Yi_im", Yi_im), ("Y_i", Y_i)]        
         diagnostics = diagnostics + [("Y_p", Y_p), ("Y_e", Y_e), ("V_p", V_p)]                
         diagnostics = diagnostics + [("I_a", I_a), ("I_b", I_b), ("I_c", I_c)]        
