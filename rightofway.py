@@ -54,7 +54,7 @@ class rightofway_ui(QtGui.QVBoxLayout):
     
     # Update number of sections in right of way
     def buttonClicked(self, tableWidget):      
-        globals.sections.resize((globals.no_sections,5))
+        globals.sections.resize((globals.no_sections,6))
         for row in range(self.tableWidget.rowCount(), globals.no_sections):
             globals.sections[row, 0] = 1.0                            
             globals.sections[row, 1] = 1.0                            
