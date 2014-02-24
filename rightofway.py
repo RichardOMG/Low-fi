@@ -90,10 +90,11 @@ class rightofway_ui(QtGui.QVBoxLayout):
         elif tableWidgetItem.column() == 3:
             element = "soil resistivity"
             value = utility.validate(tableWidgetItem.text(), lower_bound, upper_bound, l_inclusive = False, u_inclusive = False)
-        if not value is False:        
-            update_mapping = (globals.sections[tableWidgetItem.row(), tableWidgetItem.column()] != value)
-            columns = [0,1,2,2,3,4]
+        if not value is False:                    
+            columns = [0,1,2,4,5]            
             column = columns[tableWidgetItem.column()]
+            print(column,tableWidgetItem.column())
+            update_mapping = (globals.sections[tableWidgetItem.row(), column] != value)
             if isinstance(value, np.complex):
                 globals.sections[tableWidgetItem.row(), column] = np.real(value)
                 globals.sections[tableWidgetItem.row(), column + 1] = np.imag(value)
@@ -103,7 +104,7 @@ class rightofway_ui(QtGui.QVBoxLayout):
                     tableWidgetItem.setText(str(value))
             else:            
                 globals.sections[tableWidgetItem.row(), column] = value
-                tableWidgetItem.setText(str(value))
+                #tableWidgetItem.setText(str(value))
             if update_mapping:
                 self.main_window.refresh_mapping()
         else:

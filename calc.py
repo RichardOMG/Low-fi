@@ -79,8 +79,13 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
             #####################################################
             
             # Calculate mutual impedance of pipeline and aerial conductors
-            if mutual_impedance_formula == 1:
-                # Armetani mutual impedance approximation                                           
+            if mutual_impedance_formula == 1 or mutual_impedance_formula == 2:
+                # Armetani and Lucca both use the same inputs
+                if mutual_impedance_formula == 1:
+                    mutual_impedance = armetani_approximation
+                else:
+                    mutual_impedance = lucca_approximation
+            
                 rho_e = globals.sections[row,4]
             
                 # For the moment depth of burial is set to 1m..            
@@ -100,21 +105,18 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
                 L_lp = (L_a * L_b * L_c) ** (0.3333333333)     
                 
                 # Mutual impedances between pipeline and line conductors                
-                Z_lp = armetani_approximation(omega, mu_0, rho_e, H_lp - h2, h2, L_lp)
+                Z_lp = mutual_impedance(omega, mu_0, rho_e, H_lp - h2, h2, L_lp)
                 Z_lw = complex(0.0, 2.8935e-3 * globals.network_data["freq"] * np.log10(1 / np.sqrt(H_lw ** 2 + L_lw ** 2)))
-                Z_ap = armetani_approximation(omega, mu_0, rho_e, globals.tower_data["H_a"] - h2, h2, L_a)
-                Z_bp = armetani_approximation(omega, mu_0, rho_e, globals.tower_data["H_b"] - h2, h2, L_b)
-                Z_cp = armetani_approximation(omega, mu_0, rho_e, globals.tower_data["H_c"] - h2, h2, L_c)
+                Z_ap = mutual_impedance(omega, mu_0, rho_e, globals.tower_data["H_a"] - h2, h2, L_a)
+                Z_bp = mutual_impedance(omega, mu_0, rho_e, globals.tower_data["H_b"] - h2, h2, L_b)
+                Z_cp = mutual_impedance(omega, mu_0, rho_e, globals.tower_data["H_c"] - h2, h2, L_c)
                 
                 # Earthwire impedances
                 Z_aw = complex(0.0, 2.8935e-3 * globals.network_data["freq"] * np.log10(1 / np.sqrt(H_aw ** 2 + L_aw ** 2)))                
                 Z_bw = complex(0.0, 2.8935e-3 * globals.network_data["freq"] * np.log10(1 / np.sqrt(H_bw ** 2 + L_bw ** 2)))                
                 Z_cw = complex(0.0, 2.8935e-3 * globals.network_data["freq"] * np.log10(1 / np.sqrt(H_cw ** 2 + L_cw ** 2)))                
-                Z_wp = armetani_approximation(omega, mu_0, rho_e, globals.tower_data["H_w"], 0, L_w)
+                Z_wp = mutual_impedance(omega, mu_0, rho_e, globals.tower_data["H_w"], 0, L_w)
             
-            elif mutual_impedance_formula == 2:
-                # Lucca mutual impedance approximation                        
-                pass
                 
             else:
                 # AS4853 version of Carson-Clem mutual impedance approximation            
@@ -260,13 +262,34 @@ def armetani_approximation(omega, mu_0, rho, h1, h2, y):
     Zm = 1000j * omega * (mu_0 / (2 * np.pi)) * np.exp(-h2 / he) * np.log10(S / D) / np.log10(np.exp(1))    
     return Zm
     
-def lucca_approximation():
+def lucca_approximation(omega, mu_0, rho, h1, h2, y):
     """Calculates mutual impedance between overhead conductor and buried conductor using the Lucca mutual impedance approximation.
-    .....which equation????
+    This function implements the Lucca's approximation as expressed in Ametani's paper, equation 28.  This is converted to Ohm/km.
     
     G. Lucca, "Mutual Impedance Between an Overhead and a Buried Line with Earth Return", in Proc. Int. Electr. Eng. 
     9th Int. Conf. EMC, 1994, pp80-86
+    A. Ametani, T. Yoneda, Y. Baba, N. Nagaoka, "An Investigation of Earth-Return Impedance Between Overhead and 
+    Underground Conductors and Its Approximation", IEEE Transactions on Electromagnetic Compatibility, vol 51, 
+    no. 3, pp860-867, Aug. 2009
 
+    :param omega: System frequency (rad/s)
+    :type omega: Float
+    :param mu_o: Free space permeability
+    :type mu_0: Float
+    :param rho: Earth resistivity of soil
+    :type rho: Float
+    :param h1: Height of overhead conductor above ground
+    :type h1: Float
+    :param h2: Depth of buried of underground conductor
+    :type h2: Float
+    :param y: Horizontal separation between conductors
+    :type y: Float
   
     """
-    pass
+    m = np.sqrt(1j * omega * mu_0 / rho)
+    he = 1 / m
+    H = h1 + h2 + 2 * he
+    S = np.sqrt(H ** 2 + y ** 2)
+    D = np.sqrt((h1 + h2) ** 2 + y ** 2)
+    Zl = 1000j * omega * (mu_0 / (2 * np.pi)) * (np.log10(S / D) / np.log10(np.exp(1)) - (2 / 3) * ((he / S**2)**3) * H * (H**2 - 3 * y**2))
+    return Zl
