@@ -119,15 +119,6 @@ class results_ui(QtGui.QVBoxLayout):
         plt.grid(color = '0.75', linestyle='--', linewidth=1)
         plt.show()    
     
-        ##############
-        # Diagnostics
-        ##############
-        
-        #print pipe_distance
-        #print Vp_final
-        #print V_p
-
-    
     def export_fn(self):
         """Function for the Export action."""
         fname = QtGui.QFileDialog.getSaveFileName(self.main_window, "Export Data As", "", "Comma separate values (*.csv)")

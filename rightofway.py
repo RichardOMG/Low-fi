@@ -93,7 +93,6 @@ class rightofway_ui(QtGui.QVBoxLayout):
         if not value is False:                    
             columns = [0,1,2,4,5]            
             column = columns[tableWidgetItem.column()]
-            print(column,tableWidgetItem.column())
             update_mapping = (globals.sections[tableWidgetItem.row(), column] != value)
             if isinstance(value, np.complex):
                 globals.sections[tableWidgetItem.row(), column] = np.real(value)
@@ -110,12 +109,10 @@ class rightofway_ui(QtGui.QVBoxLayout):
         else:
             self.main_window.show_status_message("Section " + str(tableWidgetItem.row() + 1) + " " + element +  ": Input value '" + tableWidgetItem.text() + "' out of bounds. (" + str(lower_bound) + " to " + str(upper_bound) + "). Value not set.", error = True, beep = True)
             self.refresh_data()            
+        
         ##############
         # TODO - Apply dynamic criteria to separation distance (based on soli resistivity)
         ##############
-
-        # Diagnostics
-        # print globals.sections
         
     def refresh_data(self):
         """Update text fields to match global variables."""
