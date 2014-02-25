@@ -39,7 +39,7 @@ class results_ui(QtGui.QVBoxLayout):
         
         self.mutual_impedance_selection = QtGui.QComboBox()
         self.mutual_impedance_selection.addItem("Carson-Clem (AS4853)")
-        self.mutual_impedance_selection.addItem("Armetani approximation")
+        self.mutual_impedance_selection.addItem("Ametani approximation")
         self.mutual_impedance_selection.addItem("Lucca approximation")
         
         calc_button = QtGui.QPushButton("Calculate")

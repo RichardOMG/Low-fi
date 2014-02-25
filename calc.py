@@ -80,9 +80,9 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
             
             # Calculate mutual impedance of pipeline and aerial conductors
             if mutual_impedance_formula == 1 or mutual_impedance_formula == 2:
-                # Armetani and Lucca both use the same inputs
+                # Ametani and Lucca both use the same inputs
                 if mutual_impedance_formula == 1:
-                    mutual_impedance = armetani_approximation
+                    mutual_impedance = ametani_approximation
                 else:
                     mutual_impedance = lucca_approximation
             
@@ -236,7 +236,7 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
         return [ pipe_distance, Vp_final, diagnostics ]
 
 
-def armetani_approximation(omega, mu_0, rho, h1, h2, y):
+def ametani_approximation(omega, mu_0, rho, h1, h2, y):
     """Calculates mutual impedance between overhead conductor and buried conductor using the Ametani mutual impedance approximation.
     This function implements equation 27 of the paper which calculates Ohm/m.  This is converted to Ohm/km, hence the factor of 1000.
     
