@@ -281,8 +281,15 @@ class Window(QtGui.QWidget):
 def main():
     
     app = QtGui.QApplication(sys.argv)
+    splash_pix = QPixmap('images\splash_loading.png')
+    splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
+    splash.setMask(splash_pix.mask())
+    splash.show()
+    
     w = Window()
     w.show()
+    splash.finish(w)
+    
     sys.exit(app.exec_())
 
 
