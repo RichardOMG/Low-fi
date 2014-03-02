@@ -47,13 +47,12 @@ We are a small team of power systems engineers with broad experience in the util
 For more details, visit our website \href{http://www.sigmapower.com.au}{www.sigmapower.com.au}.
 
 \subsection{Release Notes}
-Version 0.1 Beta is a preliminary version of \textbf{Low-fi} that has the following limitations:
+Version 0.2 is a preliminary version of \textbf{Low-fi} that has the following limitations:
 
 \begin{itemize}
 \item Analysis can only be performed on a single pipeline and overhead line sharing the same corridor
 \item Only buried pipelines are considered
 \item Only single circuit towers with one overhead earth wire are considered
-\item The shielding effect of earth wires for fault LFI cases is not calculated internally by the program and must be explicitly specified
 \end{itemize} 
 
 Future releases will include the ability to analyse more complex joint rights of way and configurations.
@@ -208,6 +207,42 @@ At a nominal frequency of 50Hz, this is equivalent to maximum separations of 40m
 \end{center}
 \end{figure}
 
+\subsubsection{Lucca Formulation}
+Lucca proposed a more accurate approximation for the mutual impedance between overhead and buried conductors \cite{lucca_1994}:
+
+\begin{equation}
+Z_{lp} = j \omega \left( \frac{\mu_{0}}{2 \pi} \right) \left[ \ln \left( \frac{S}{D} \right) - \left( \frac{2}{3} \right) \left( \frac{h_{e}}{S^{2}}^{3} H (H^{2} - 3y^{2}) \right) \right]
+\end{equation}
+
+Where $Z_{lp}$ is the mutual impedance between a pipeline and an overhead line conductor ($\Omega$/km) \\
+\hphantom{Where} $\omega$ is the nominal angular frequency \\
+\hphantom{Where} $\mu_{0} = 4 \pi \times 10^{-7}$ is the permeability of free space (H/m) \\
+\hphantom{Where} $h_{e} = \sqrt{\frac{\rho}{j \omega \mu_{0}}}$ is the equivalent earth return depth \\
+\hphantom{Where} $\rho$ is the soil / earth resistivity ($\Omega$.m) \\
+\hphantom{Where} $S = \sqrt{H^{2} + d_{lp}^{2}}$ \\
+\hphantom{Where} $H = h_{lp} + 2h_{e}$ \\
+\hphantom{Where} $D = \sqrt{h_{lp}^{2} + d_{lp}^{2}}$ \\
+\hphantom{Where} $h_{lp}$ is the height from the overhead line conductor to the pipeline (m) \\
+\hphantom{Where} $d_{lp}$ is the horizontal distance between the pipeline and overhead line conductor (m)
+
+\subsubsection{Ametani Formulation}
+More recently, Ametani also proposed a better approximation for the mutual impedance between overhead and buried conductors \cite{ametani_2009}: 
+
+\begin{equation}
+Z_{lp} = j \omega \left( \frac{\mu_{0}}{2 \pi} \right) \exp \left( \frac{-h_{2}}{h_{e}} \right) \ln \left( \frac{S}{D} \right)
+\end{equation}
+
+Where $Z_{lp}$ is the mutual impedance between a pipeline and an overhead line conductor ($\Omega$/km) \\
+\hphantom{Where} $\omega$ is the nominal angular frequency \\
+\hphantom{Where} $\mu_{0} = 4 \pi \times 10^{-7}$ is the permeability of free space (H/m) \\
+\hphantom{Where} $h_{e} = \sqrt{\frac{\rho}{j \omega \mu_{0}}}$ is the equivalent earth return depth \\
+\hphantom{Where} $\rho$ is the soil / earth resistivity ($\Omega$.m) \\
+\hphantom{Where} $S = \sqrt{H^{2} + d_{lp}^{2}}$ \\
+\hphantom{Where} $H = h_{lp} + 2h_{e}$ \\
+\hphantom{Where} $D = \sqrt{h_{lp}^{2} + d_{lp}^{2}}$ \\
+\hphantom{Where} $h_{lp}$ is the height from the overhead line conductor to the pipeline (m) \\
+\hphantom{Where} $d_{lp}$ is the horizontal distance between the pipeline and overhead line conductor (m)
+
 \subsection{Induced Voltages in Pipeline}
 The induced voltage on a section of the pipeline from a loaded conductor is calculated as follows:
 
@@ -218,6 +253,18 @@ V_{p} = I_{l} Z_{lp}
 Where $V_p$ is the induced voltage on the section of pipeline (V) \\
 \hphantom{Where} $I_{l}$ is the current flowing through the overhead line conductor (A) \\
 \hphantom{Where} $Z_{lp}$ is the mutual impedance between the section of pipeline and an overhead line conductor ($\Omega$)
+
+\subsection{Influence of Overhead Earth Wires}
+Overhead earth wires can have a shielding effect on the pipeline induced voltage, or in the case of load LFI, they can make the system more asymmetrical and increase the induced voltages. In \textbf{Low-fi}, the effect of overhead earth wires is taken into account by adjusting the mutual impedance between the overhead phase conductor and pipeline as follows:
+
+\begin{equation}
+Z_{lp}' = Z_{lp} - \frac{Z_{lw} \times Z_{wp}}{Z_{w}}
+\end{equation}
+
+Where $Z_{lp}'$ and $Z_{lp}$ are the adjusted and original mutual impedances between a pipeline and an overhead line conductor ($\Omega$/km) \
+\hphantom{Where} $Z_{lw}$ is the mutual impedance between the overhead phase conductor and earth wire ($\Omega$/km) \\
+\hphantom{Where} $Z_{wp}$ is the mutual impedance between the overhead earth wire and the pipeline ($\Omega$/km) \\
+\hphantom{Where} $Z_{w}$ is the self-impedance of the overhead earth wire ($\Omega$/km)
 
 \subsection{Calculation of Shunt Potentials}
 \textbf{Low-Fi} uses the classical method for calculating pipeline-to-earth touch voltages (or shunt potentials) by sub-dividing the joint right-of-way into "electrically short" subsections that have relatively constant parallelism. This method is described in Appendix H of the CIGRE Working Group 36.02 report \cite{cigre_1995}.
@@ -306,8 +353,8 @@ The Right of Way tab describes the plan layout of the overhead line in relation 
 \item For each section, the geometric average separation distance is calculated based on the separation distances for the current section and the next section
 \item For the final section (where there is no next section) or where the next section is non-parallel, the separation distance is assumed to be constant for the entire sectional length
 \item A separation distance $<$0 indicates that the pipeline is not parallel to the overhead line
-\item An earthing impedance $<$0 indicates that the start of the pipeline section is not intentionally earthed
-\item The phasing field indicates the phase rotation of the overhead line conductors to allow the modelling of line transpositions. Each field should be set as an integer number from 0 to 2, where 0 indicates no phase rotation, 1 indicates a 120 degree phase rotation and 2 indicates a 240 degree phase rotation. 
+\item An earthing impedance $<$0 indicates that the start of the pipeline section is not intentionally earthed. Earthing impedances can be real or complex values. For complex impedances, use the 'j' operator, e.g. $0.5 + 0.4j \Omega$
+\item The phasing field indicates the phase rotation of the overhead line conductors to allow the modelling of line transpositions. Each field is a dropdown box indicating no phase rotation, a 120 degree phase rotation or a 240 degree phase rotation. 
 \end{itemize}
 
 \subsection{Tower Tab}
