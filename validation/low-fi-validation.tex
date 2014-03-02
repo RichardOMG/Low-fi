@@ -13,7 +13,7 @@
 
 % TITLE
 \title{Low-Fi Validation Report}
-\author{Version 0.1 Beta}
+\author{Version 0.2}
 \date{Copyright \textcircled{c}  2014 Sigma Power Engineering Pty Ltd}
 
 \begin{document}
@@ -77,6 +77,7 @@ In the base case, the following parameters are used:
 \item Separation distance = 100m
 \item Pipeline end earthing resistances = 0.1$\Omega$
 \item Soil resistivity = 100$\Omega.m$
+\item Mutual inductance formulation = Carson-Clem
 \end{itemize} 
 
 Figure \ref{fig:simple_cdegs} shows the simulation results of the base case in \textbf{Low-fi} and CDEGS. It can be seen that the shape of the induced voltages are identical, but there are minor differences in the induced voltages at the pipeline ends.
@@ -89,7 +90,7 @@ Figure \ref{fig:simple_cdegs} shows the simulation results of the base case in \
 \end{center}
 \end{figure}
 
-Ten variations on the parameters of the simple right-of-way are made and the \textbf{Low-fi} simulation results are compared against results from CDEGS. A summary of the comparison is shown in Table \ref{tab:simple_cdegs} below.
+Ten variations on the parameters of the simple right-of-way are made and the \textbf{Low-fi} simulation results (using the Carson-Clem formulation) are compared against results from CDEGS. A summary of the comparison is shown in Table \ref{tab:simple_cdegs} below.
 
 \begin{table}[!htp]
 \caption{Comparison of \textbf{Low-fi} results with CDEGS for variations on simple right-of-way parameters}
@@ -119,6 +120,30 @@ An important observation is that \textbf{Low-fi} accuracy falls off significantl
 
 The last column of Table \ref{tab:simple_cdegs} shows the maximum separation distance for each case. It can be seen that when the separation distances deviate too far from the maximum distance, the error becomes larger (for example, the separation distance in Case 6 is 7.9 times larger than the maximum allowable distance).
 
+The simulations are repeated with the Ametani and Lucca formulations and the results are shown in Table \ref{tab:simple_cdegs2}. It can be seen that the deviations from the CDEGS results are significantly reduced for the cases where the Carson-Clem formulation fail.
+
+\begin{table}[!htp]
+\caption{Comparison of \textbf{Low-fi} results using Ametani and Lucca formulations with CDEGS for variations on simple right-of-way parameters}
+\label{tab:simple_cdegs2}
+\begin{tabular}{@{}cccccccc@{}}
+\toprule
+\multirow{3}{*}{\textbf{Case}} \\& \textbf{Exposure}  & \textbf{Separ-} & \textbf{Soil} & \textbf{Earth}  & \multicolumn{3}{c}{\textbf{Simulated Induced Voltage (V)}} \\ \cmidrule(lr){6-8}
+& \textbf{Length} & \textbf{ation (m)} & \textbf{Rho ($\Omega$.m)} &  \textbf{Resistance}                                                      & \textbf{CDEGS}   & \textbf{Low-fi}   & \textbf{Low-fi}  \\
+& \textbf{(km)} &  &  &  \textbf{($\Omega$)} &   & \textbf{(Ametani)}  & \textbf{(Lucca)}                                         \\ \midrule
+Base                              & 6                                              & 100                                      & 100                                                & 0.1                                                    & 590              & 649	& 629                                                      \\ \midrule
+1                              & 6                                              & 270                                      & 100                                                & 0.4                                                    & 1390             & 1526	& 1446                                                        \\ \midrule
+2                              & 6                                              & 350                                      & 100                                                & 0.4                                                    & 1180             & 1297	& 1215                                                      \\ \midrule
+3                              & 6                                              & 500                                      & 100                                                & 0.4                                                    & 900              & 990	& 916                                                        \\ \midrule
+4                              & 12                                             & 480                                      & 100                                                & 0.4                                                    & 1000             & 1062	& 983                                                          \\ \midrule
+5                              & 6                                              & 250                                      & 20                                                 & 0.4                                                    & 950              & 959	& 896                                                           \\ \midrule
+6                              & 6                                              & 450                                      & 20                                                 & 0.4                                                    & 500              & 477	& 547                                                        \\ \midrule
+7                              & 3                                              & 300                                      & 100                                                & 0.4                                                    & 1190             & 1282	& 1210                                                          \\ \midrule
+8                              & 3                                              & 400                                      & 100                                                & 0.4                                                    & 970              & 1057	& 984                                                          \\ \midrule
+9                             & 1                                              & 100                                      & 100                                                & 0.4                                                    & 1275             & 1315	& 1273                                                         \\ \midrule
+10                             & 1                                              & 200                                      & 100                                                & 0.4                                                    & 950              & 974	& 931                                                           \\ \bottomrule
+\end{tabular}
+\end{table}
+
 \newpage
 \section{Kalamazoo Line 1800}
 The original case study for the Consumers Power Company line 1800 pipeline in Kalamazoo is described on page 3-51 of EPRI report EL-904 \cite{EPRI_1978}. The pipeline is a 20" gas line located near Kalamazoo, Michigan, running for approximately 31.1km from the Plainwell valve site in the south (0km) to the 30th street valve site in the north (31.1km). The pipeline shares a joint right-of-way with a 345kV overhead tower line, which runs in parallel with the pipeline for approximately 27.1km. A cross-sectional layout of the joint right-of-way is shown in Figure \ref{fig:kalamazoo_geo}. 
@@ -133,11 +158,12 @@ The original case study for the Consumers Power Company line 1800 pipeline in Ka
 
 Data entry and assumptions for the case study are as follows:
 \begin{itemize}
-\item \textbf{Earthing resistances}: at the Plainwell valve site (0km), the earthing resistance was measured to be 0.15$\Omega$. At the 30th street valve site (31.1km), the pipeline is physically connected to a 24" pipeline (with different coating characteristics) and then bonded to another 16" pipeline. The equivalent earthing impedance of these pipelines is calculated to be 0.4 + j0.314 $\Omega$. \textbf{Low-fi} only supports real earthing impedances and so the magnitude of the equivalent impedance is used (0.44$\Omega$).
+\item \textbf{Earthing resistances}: at the Plainwell valve site (0km), the earthing resistance was measured to be 0.15$\Omega$. At the 30th street valve site (31.1km), the pipeline is physically connected to a 24" pipeline (with different coating characteristics) and then bonded to another 16" pipeline. The equivalent earthing impedance of these pipelines is calculated to be 0.4 + j0.314 $\Omega$.
 \item \textbf{Pipeline characteristics}: line 1800 is a 20" buried pipeline with (a) pipe steel resistivity = 0.17 $\mu\Omega$.m, (b) pipe steel relative permeability = 300, (c) coating resistivity = 300,000 $\Omega.ft^{2}$ = $2.787 \times 10^{7} \Omega$.m
 \item \textbf{Soil resistivity}: 400 $\Omega$.m
 \item \textbf{Tower characteristics}: the tower geometry is as per Figure \ref{fig:kalamazoo_geo}. Note that a double-circuit tower is shown in the figure. In \textbf{Low-fi}, this is converted to a single-circuit tower by taking the mean positions of the phase and earth conductors.
 \item \textbf{Network characteristics}: the network is a 60Hz system and the load current is 50A (balanced).
+\item \textbf{Mutual impedance formulation}: Carson-Clem
 \end{itemize}
 
 The validation results for load LFI on line 1800 are shown in Figure \ref{fig:kalamazoo_comparison}, with comparisons to measured data, CDEGS simulation results and PRC simulation results.
@@ -153,7 +179,7 @@ The validation results for load LFI on line 1800 are shown in Figure \ref{fig:ka
 The following observations are made regarding the validation results:
 \begin{itemize}
 \item There is generally very good agreement between the results from \textbf{Low-fi} and the results from measurements and other software packages.
-\item Like \textbf{Low-fi}, PRC only supports real earthing resistances, which explains the deviation from the CDEGS results at the 30th street end (31.1km). 
+\item PRC only supports real earthing resistances, which explains the deviation from the CDEGS results at the 30th street end (31.1km). The \textbf{Low-fi} are in between PRC and CDEGS.
 \end{itemize}
 
 \newpage
@@ -183,6 +209,7 @@ Data entry and assumptions for the case study are as follows:
 \item \textbf{Soil resistivity}: 400 $\Omega$.m
 \item \textbf{Tower characteristics}: the tower geometry is as per Figure \ref{fig:needles_geo} and there is a phase-wise transposition at Milepost 68.
 \item \textbf{Network characteristics}: the network is a 60Hz system and the load current is 700A (balanced).
+\item \textbf{Mutual impedance formulation}: Carson-Clem
 \end{itemize}
 
 The validation results for load LFI on Needles line 235 are shown in Figure \ref{fig:needles_comparison}, with comparisons to measured data, CDEGS simulation results and PRC simulation results.
@@ -199,7 +226,7 @@ The following observations are made regarding the validation results:
 \begin{itemize}
 \item The results from \textbf{Low-fi} are able to predict the voltage peaks on the pipeline and compare quite well with the measurements and results from other software packages.
 \item \textbf{Low-fi} results are generally more conservative than the other software packages, for example, predicting a larger peak at milepost 77. 
-\item The large peak at milepost 77 can be attributed to the fact that the separation distances in this area are quite large (3000ft = 914m). The maximum separation distance for which the Carson-Clem equations are accurate is in the order of 255m, which helps to explains the inaccuracy. The same logic applies for the area between mileposts 50 and 57, where the \textbf{Low-fi} results deviate from the other results due to the higher separation distances (up to 2000ft = 610m).
+\item The modelling of the right-of-way is approximate due to the information given in the original papers. This could be the reason for the anomalous peak at milepost 77 and the deviation in shape between mileposts 50 and 57.
 \item Earthing resistances at the ends of the pipeline were not known and therefore not modelled. This has the effect of pushing the voltage up at the ends of the pipeline, particularly at milepost 104.
 \end{itemize}
 
