@@ -20,6 +20,9 @@ from network import *
 from results import *
 from diagnostics import *
 from mapping import *
+
+import matplotlib.backends.backend_tkagg
+
 import globals
 
 class Window(QtGui.QWidget):
