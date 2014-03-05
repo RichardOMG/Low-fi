@@ -22,6 +22,7 @@ import dateutil, pyparsing
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
                       
 class results_ui(QtGui.QVBoxLayout): 
     
@@ -113,7 +114,7 @@ class results_ui(QtGui.QVBoxLayout):
         if self.plot is not None:
             self.plot.close()
 
-        self.plot = Qt4MplCanvas(pipe_distance, Vp_final, "Distance along pipeline (m)", ylabel, title)
+        self.plot = PlotWindow(pipe_distance, Vp_final, "Distance along pipeline (m)", ylabel, title)
         self.plot.show()
         
     
@@ -128,11 +129,25 @@ class results_ui(QtGui.QVBoxLayout):
         else:
             self.main_window.show_status_message("Export cancelled.")                   
     
+class PlotWindow(QMainWindow):
+    """Separate window for plot."""
+    def __init__(self, x, y, xlabel, ylabel, title):
+        QtGui.QMainWindow.__init__(self)
+        self.setWindowTitle("Figure - " + title)
+        self.main_widget = QtGui.QWidget(self)
+        vbox = QtGui.QVBoxLayout(self.main_widget)
+        figure = PlotCanvas(self.main_widget, x, y, xlabel, ylabel, title)
+        toolbar = NavigationToolbar(figure, self.main_widget)
+        vbox.addWidget(figure) 
+        vbox.addWidget(toolbar)
+        self.main_widget.setFocus() 
+        self.setCentralWidget(self.main_widget) 
+        
     
-class Qt4MplCanvas(FigureCanvas):
+class PlotCanvas(FigureCanvas):
     """Implements matplotlib figure window to avoid clashes between PyQt and matplotlib."""
 
-    def __init__(self, x, y, xlabel, ylabel, title):
+    def __init__(self, parent, x, y, xlabel, ylabel, title):
         self.fig = Figure()
         self.axes = self.fig.add_subplot(111)
         self.x = x
@@ -143,5 +158,7 @@ class Qt4MplCanvas(FigureCanvas):
         self.axes.set_xlabel(xlabel)
         self.axes.grid(color = '0.75', linestyle='--', linewidth=1)
         self.axes.plot(self.x, self.y)
-        FigureCanvas.__init__(self, self.fig)    
+        FigureCanvas.__init__(self, self.fig)
+        
+        self.setParent(parent)
     
