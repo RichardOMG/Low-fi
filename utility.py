@@ -194,8 +194,9 @@ class LowFiTable(QtGui.QTableWidget):
         """Function for the Paste action."""
         # There might be a more elegant way of doing this..
         try:
-            data = QApplication.clipboard().text()
-            data = [ [ float(val) for val in line.split('\t') if len(val) > 0 ] for line in data.split('\n') if len(line) > 0 ]        
+            # convert data to String if required
+            data = str(QApplication.clipboard().text())
+            data = [ [ (np.complex(val) if val.find("j") > 0 else float(val)) for val in line.split('\t') if len(val) > 0 ] for line in data.split('\n') if len(line) > 0 ]        
             if len(self.selectedIndexes()) > 0 and len(data) > 0:
                 data_rows = len(data)
                 data_columns = len(data[0])
@@ -205,7 +206,7 @@ class LowFiTable(QtGui.QTableWidget):
                 active_column = self.selectedIndexes()[0].column()
                 selection = QtGui.QItemSelection(self.model().index(active_row, active_column), self.model().index(active_row + data_rows - 1, active_column + data_columns - 1))
                 self.selectionModel().select(selection, QItemSelectionModel.ClearAndSelect)
-                if active_row + data_rows > table_rows or active_column + data_columns > table_columns:
+                if active_row + data_rows > table_rows or active_column + data_columns > (table_columns - 1):
                     self.main_window.show_status_message("Clipboard data too large.", error = True, beep = True)
                 else:                    
                     for r in range(data_rows):
@@ -266,4 +267,4 @@ class LowFiTable(QtGui.QTableWidget):
         """Return the data from the table as a 2D list."""
         data = [ [ self.item(r, c).text() for c in range(self.columnCount()) ] for r in range(self.rowCount()) ]
         return data
-       
+    
