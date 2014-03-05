@@ -74,7 +74,7 @@ class results_ui(QtGui.QVBoxLayout):
         
         vbox.addWidget(self.results_table)                
              
-             
+        self.plot = None
         
     
     # Calculate load and fault LFI voltages on the pipeline
@@ -110,8 +110,11 @@ class results_ui(QtGui.QVBoxLayout):
             ylabel = "Pipeline-to-earth touch voltage (kV)"
             title = "Fault LFI Voltages"        
 
-        plot = Qt4MplCanvas(pipe_distance, Vp_final, "Distance along pipeline (m)", ylabel, title)
-        plot.show()
+        if self.plot is not None:
+            self.plot.close()
+
+        self.plot = Qt4MplCanvas(pipe_distance, Vp_final, "Distance along pipeline (m)", ylabel, title)
+        self.plot.show()
         
     
     def export_fn(self):
