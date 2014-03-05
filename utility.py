@@ -180,10 +180,12 @@ class LowFiTable(QtGui.QTableWidget):
         rows = self.selectedRanges()[0].rowCount()
         columns = self.selectedRanges()[0].columnCount()
         # For some reason the selectedIndexes output is transposed, so we have to transpose it
-        data = np.array([ index.data() for index in self.selectedIndexes() ])
+        # Python 3.3 receives a str from .data(), 2.7 receives QVariant        
+        data = np.array([ (index.data().toString() if type(index.data()) == QtCore.QVariant else index.data()) for index in self.selectedIndexes() ])
         data.resize((columns, rows))
         data = np.transpose(data).flatten()        
         delimiters = ([ "\t" for c in range(columns - 1) ] + ["\n"]) * rows        
+        # explicit string conversion required for Python 2.7
         copy = [char for pair in zip(data, delimiters) for char in pair]
         copy = ''.join(copy)
         QApplication.clipboard().setText(copy)

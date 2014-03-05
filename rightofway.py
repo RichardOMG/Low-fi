@@ -84,13 +84,14 @@ class rightofway_ui(QtGui.QVBoxLayout):
         elif tableWidgetItem.column() == 2:
             element = "earth impedance"
             try:
-                value = np.complex(tableWidgetItem.text())                                
+                # explicit string conversion required for Python 2.7
+                value = np.complex(str(tableWidgetItem.text()))
             except:
                 value = False
         elif tableWidgetItem.column() == 3:
             element = "soil resistivity"
             value = utility.validate(tableWidgetItem.text(), lower_bound, upper_bound, l_inclusive = False, u_inclusive = False)
-        if not value is False:                    
+        if not value is False:   
             columns = [0,1,2,4,5]            
             column = columns[tableWidgetItem.column()]
             update_mapping = (globals.sections[tableWidgetItem.row(), column] != value)
@@ -108,7 +109,9 @@ class rightofway_ui(QtGui.QVBoxLayout):
                 self.main_window.refresh_mapping()
         else:
             self.main_window.show_status_message("Section " + str(tableWidgetItem.row() + 1) + " " + element +  ": Input value '" + tableWidgetItem.text() + "' out of bounds. (" + str(lower_bound) + " to " + str(upper_bound) + "). Value not set.", error = True, beep = True)
-            self.refresh_data()            
+            self.tableWidget.itemChanged.disconnect()
+            self.refresh_data()          
+            self.tableWidget.itemChanged.connect(self.update_data_matrix)            
         
         ##############
         # TODO - Apply dynamic criteria to separation distance (based on soli resistivity)
