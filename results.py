@@ -19,7 +19,9 @@ import utility
 import calc
 import numpy as np
 import dateutil, pyparsing
-import matplotlib.pyplot as plt
+
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
                       
 class results_ui(QtGui.QVBoxLayout): 
     
@@ -89,7 +91,7 @@ class results_ui(QtGui.QVBoxLayout):
             self.main_window.diagnostics_matrix(title = title, data = data)
         
         # Populate table of results in calc
-        if self.combo.currentText() == "Load LFI":
+        if loadLFI:
             data = np.transpose(np.array([pipe_distance, Vp_final]))
         else:
             # Convert kV to V for fault LFI cases
@@ -100,24 +102,17 @@ class results_ui(QtGui.QVBoxLayout):
         # Unhide export button
         self.export_button.show()   
         
-        # Plot results        
-        
-        if plt.fignum_exists(1):
-            plt.close()
-        
-        plt.plot(pipe_distance, Vp_final)
-        plt.xlim([0, pipe_distance[globals.no_sections]])
-        plt.xlabel("Distance along pipeline (m)")
-        
-        if self.combo.currentText() == "Load LFI":
-            plt.ylabel("Pipeline-to-earth touch voltage (V)")
-            plt.title("Load LFI Voltages")
+        # Plot results  
+        if loadLFI:
+            ylabel = "Pipeline-to-earth touch voltage (V)"
+            title = "Load LFI Voltages"
         else:
-            plt.ylabel("Pipeline-to-earth touch voltage (kV)")
-            plt.title("Fault LFI Voltages")
+            ylabel = "Pipeline-to-earth touch voltage (kV)"
+            title = "Fault LFI Voltages"        
+
+        plot = Qt4MplCanvas(pipe_distance, Vp_final, "Distance along pipeline (m)", ylabel, title)
+        plot.show()
         
-        plt.grid(color = '0.75', linestyle='--', linewidth=1)
-        plt.show()    
     
     def export_fn(self):
         """Function for the Export action."""
@@ -130,4 +125,20 @@ class results_ui(QtGui.QVBoxLayout):
         else:
             self.main_window.show_status_message("Export cancelled.")                   
     
+    
+class Qt4MplCanvas(FigureCanvas):
+    """Implements matplotlib figure window to avoid clashes between PyQt and matplotlib."""
+
+    def __init__(self, x, y, xlabel, ylabel, title):
+        self.fig = Figure()
+        self.axes = self.fig.add_subplot(111)
+        self.x = x
+        self.y = y
+        self.axes.set_ylabel(ylabel)
+        self.axes.set_title(title)
+        self.axes.set_xlim([0, max(x)])
+        self.axes.set_xlabel(xlabel)
+        self.axes.grid(color = '0.75', linestyle='--', linewidth=1)
+        self.axes.plot(self.x, self.y)
+        FigureCanvas.__init__(self, self.fig)    
     
