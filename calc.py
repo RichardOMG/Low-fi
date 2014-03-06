@@ -101,9 +101,9 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
                 H_lw = (H_aw * H_bw * H_cw) ** (0.3333333333)
                 H_lp = (globals.tower_data["H_a"] * globals.tower_data["H_b"] * globals.tower_data["H_c"]) ** (0.3333333333)
 
-                L_aw = globals.tower_data["L_aw"]
-                L_bw = globals.tower_data["L_ab"] - globals.tower_data["L_aw"]
-                L_cw = globals.tower_data["L_ac"] - globals.tower_data["L_aw"]
+                L_aw = abs(globals.tower_data["L_aw"])
+                L_bw = abs(globals.tower_data["L_ab"] - globals.tower_data["L_aw"])
+                L_cw = abs(globals.tower_data["L_ac"] - globals.tower_data["L_aw"])
                 L_lw = (L_aw * L_bw * L_cw) ** (0.3333333333)
                 L_lp = (L_a * L_b * L_c) ** (0.3333333333)     
                 

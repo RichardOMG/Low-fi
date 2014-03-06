@@ -243,7 +243,7 @@ class Window(QtGui.QWidget):
         QtGui.QMessageBox.about(self, "About Low-Fi",
                 """<b>Low-Fi</b> is a low-frequency induction (LFI) simulator that is intended to calculate induced voltages on pipelines sharing a joint right-of-way with overhead powerlines.
                    <p>
-                   Version: <b>v0.1 Beta<b><P>
+                   Version: <b>v0.2<b><P>
                    <p>
                    Website: <a href="http://www.sigmapower.com.au/low-fi.html">www.sigmapower.com.au/low-fi.html</a>
                    <p> </p>
