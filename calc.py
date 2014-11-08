@@ -47,7 +47,8 @@ def calculate(loadLFI, mutual_impedance_formula = 0):
         for row in range(0, globals.no_sections):
             
             # Pipeline longitudinal series impedance (in Ohm/km) - from CIGRE WG 36.02 Appendix G
-            Zi_im = mu_0 * globals.network_data["freq"] * np.log((3.7/globals.pipe_data["diameter"]) * (globals.sections[row,4] / (mu_0 * omega)) ** 0.5)
+            Zi_im = 1/(np.pi * globals.pipe_data["diameter"] * np.sqrt(2)) * ((omega * globals.pipe_data["pipe_rho"] * mu_0 * globals.pipe_data["pipe_mu"]) ** 0.5) + mu_0 * globals.network_data["freq"] * np.log((3.7/globals.pipe_data["diameter"]) * (globals.sections[row,4] / (mu_0 * omega)) ** 0.5)
+            print(Zi_im)
             Z_i = complex(Zi_re * 1000, Zi_im * 1000)
         
             # Compute pipeline admittances
