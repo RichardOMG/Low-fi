@@ -17,4 +17,4 @@ Credits
 -------
 
 + **Julius Susanto** - http://github.com/susantoj
-+ **Tom Walker*** - https://github.com/walkertd
++ **Tom Walker** - https://github.com/walkertd
