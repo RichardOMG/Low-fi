@@ -12,3 +12,9 @@ See also the [user documentation](https://github.com/susantoj/Low-fi/blob/master
 	- Dateutil
 	- Pyparsing
 - simplejson
+
+Credits
+-------
+
++ **Julius Susanto** - http://github.com/susantoj
++ **Tom Walker*** - https://github.com/walkertd
