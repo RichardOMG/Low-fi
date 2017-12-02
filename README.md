@@ -4,6 +4,8 @@
 
 See also the [user documentation](https://github.com/susantoj/Low-fi/blob/master/docs/low-fi-doc.pdf) (PDF, 521kb).
 
+![screenshot of GUI](/images/lowfi_main.png?raw=true)
+
 ##  Minimum requirements
 - Python 2.7+
 - PyQt
